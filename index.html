@@ -325,40 +325,65 @@
   <!-- ========== THE TVA ASSISTANT (she watches the timeline) ========== -->
   <div class="miss" id="missMinutes" aria-hidden="true">
     <div class="miss-bubble" id="missBubble">Hey y&rsquo;all!</div>
-    <svg class="miss-svg" viewBox="0 0 200 210" role="img" aria-label="The TVA's animated clock assistant">
-      <!-- arms -->
-      <path class="miss-arm miss-arm--l" d="M28 108 Q6 96 10 76" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <path class="miss-arm miss-arm--r" d="M172 108 Q196 92 190 68" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <!-- feet -->
-      <ellipse cx="72" cy="196" rx="16" ry="7" fill="#221A14"/>
-      <ellipse cx="128" cy="196" rx="16" ry="7" fill="#221A14"/>
+    <svg class="miss-svg" viewBox="0 0 200 214" role="img" aria-label="Miss Minutes, the TVA's animated clock assistant">
+      <!-- legs + shoes -->
+      <line x1="82" y1="168" x2="78" y2="192" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+      <line x1="118" y1="168" x2="122" y2="192" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+      <ellipse cx="72" cy="198" rx="16" ry="7" fill="#221A14"/>
+      <ellipse cx="128" cy="198" rx="16" ry="7" fill="#221A14"/>
+      <!-- arms with gloved hands -->
+      <path class="miss-arm miss-arm--l" d="M30 106 Q8 100 12 80" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+      <path class="miss-arm miss-arm--r" d="M170 106 Q194 94 188 70" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="13" cy="76" r="9" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
+      <circle cx="189" cy="66" r="9" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
       <!-- body -->
-      <circle cx="100" cy="104" r="80" fill="#E8641C" stroke="#221A14" stroke-width="5"/>
-      <circle cx="100" cy="104" r="60" fill="#F7ECD2" stroke="#221A14" stroke-width="3"/>
-      <!-- dial ticks -->
-      <g stroke="#221A14" stroke-width="3" stroke-linecap="round">
-        <line x1="100" y1="50" x2="100" y2="58"/><line x1="100" y1="150" x2="100" y2="158"/>
-        <line x1="46" y1="104" x2="54" y2="104"/><line x1="146" y1="104" x2="154" y2="104"/>
-        <line x1="62" y1="66" x2="68" y2="72"/><line x1="132" y1="136" x2="138" y2="142"/>
-        <line x1="138" y1="66" x2="132" y2="72"/><line x1="68" y1="136" x2="62" y2="142"/>
+      <circle cx="100" cy="102" r="80" fill="#E8641C" stroke="#221A14" stroke-width="5"/>
+      <ellipse cx="72" cy="58" rx="30" ry="16" fill="#FFFFFF" opacity="0.22" transform="rotate(-24 72 58)"/>
+      <circle cx="100" cy="102" r="61" fill="#F8EED4" stroke="#221A14" stroke-width="3"/>
+      <!-- dial ticks (12/3/6/9 bold) -->
+      <g stroke="#221A14" stroke-linecap="round">
+        <line x1="100" y1="45" x2="100" y2="56" stroke-width="5"/>
+        <line x1="100" y1="148" x2="100" y2="159" stroke-width="5"/>
+        <line x1="43" y1="102" x2="54" y2="102" stroke-width="5"/>
+        <line x1="146" y1="102" x2="157" y2="102" stroke-width="5"/>
+        <g stroke-width="3">
+          <line x1="60" y1="62" x2="66" y2="68"/><line x1="134" y1="136" x2="140" y2="142"/>
+          <line x1="140" y1="62" x2="134" y2="68"/><line x1="66" y1="136" x2="60" y2="142"/>
+        </g>
       </g>
-      <!-- hands: permanently almost-launch o'clock -->
-      <line x1="100" y1="104" x2="100" y2="70" stroke="#221A14" stroke-width="5" stroke-linecap="round"/>
-      <line x1="100" y1="104" x2="124" y2="116" stroke="#221A14" stroke-width="5" stroke-linecap="round"/>
-      <circle cx="100" cy="104" r="5.5" fill="#B3352B"/>
-      <!-- eyes -->
+      <!-- little TVA badge pinned to the rim -->
+      <circle cx="47" cy="152" r="9" fill="#14453D" stroke="#C2A24C" stroke-width="2.5"/>
+      <text x="47" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#EDE6D6">T</text>
+      <!-- clock hands, set to almost-launch o'clock (behind the face) -->
+      <line x1="100" y1="102" x2="88" y2="76" stroke="#221A14" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="100" y1="102" x2="122" y2="94" stroke="#221A14" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
+            <!-- brows -->
+      <g class="miss-brows" stroke="#221A14" stroke-width="3.5" stroke-linecap="round" fill="none">
+        <path d="M64 68 Q78 60 92 67"/>
+        <path d="M108 67 Q122 60 136 68"/>
+      </g>
+      <!-- eyes with lashes -->
       <g class="miss-eyes">
-        <ellipse cx="78" cy="90" rx="9" ry="11" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
-        <ellipse cx="122" cy="90" rx="9" ry="11" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
-        <circle class="miss-pupil" cx="78" cy="92" r="4.4" fill="#221A14"/>
-        <circle class="miss-pupil" cx="122" cy="92" r="4.4" fill="#221A14"/>
-        <path d="M66 80 l-6 -5 M134 80 l6 -5" stroke="#221A14" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="78" cy="88" rx="10" ry="12" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
+        <ellipse cx="122" cy="88" rx="10" ry="12" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
+        <circle class="miss-pupil" cx="78" cy="90" r="4.8" fill="#221A14"/>
+        <circle class="miss-pupil" cx="122" cy="90" r="4.8" fill="#221A14"/>
+        <circle cx="79.5" cy="88" r="1.6" fill="#fff"/>
+        <circle cx="123.5" cy="88" r="1.6" fill="#fff"/>
+        <g stroke="#221A14" stroke-width="2.6" stroke-linecap="round">
+          <path d="M64 79 l-7 -4"/><path d="M67 74 l-5 -6"/>
+          <path d="M136 79 l7 -4"/><path d="M133 74 l5 -6"/>
+        </g>
       </g>
-      <!-- smile (turns smug in CSS when .is-smug) -->
-      <path class="miss-mouth" d="M84 126 Q100 140 116 126" fill="none" stroke="#221A14" stroke-width="4" stroke-linecap="round"/>
+      <!-- mouths: smile / scare / smirk -->
+      <path class="miss-mouth miss-mouth--smile" d="M79 122 Q100 143 121 122 Q100 131 79 122 Z" fill="#B03A2E" stroke="#7B241C" stroke-width="1.5"/>
+      <ellipse class="miss-mouth miss-mouth--scare" cx="100" cy="128" rx="9" ry="12" fill="#7B241C"/>
+      <path class="miss-mouth miss-mouth--smirk" d="M82 126 Q104 138 119 120" fill="none" stroke="#7B241C" stroke-width="4" stroke-linecap="round"/>
       <!-- blush -->
-      <circle cx="64" cy="116" r="6" fill="#E8641C" opacity="0.45"/>
-      <circle cx="136" cy="116" r="6" fill="#E8641C" opacity="0.45"/>
+      <circle cx="60" cy="112" r="6.5" fill="#E8641C" opacity="0.5"/>
+      <circle cx="140" cy="112" r="6.5" fill="#E8641C" opacity="0.5"/>
+      <!-- centre pin -->
+      <circle cx="100" cy="102" r="5" fill="#B3352B" stroke="#221A14" stroke-width="2"/>
     </svg>
     <button class="miss-close" id="missClose" type="button" aria-label="Dismiss the TVA assistant">×</button>
   </div>

@@ -341,11 +341,16 @@
       missLineIdx++;
     }
     miss.classList.remove('is-smug');
+    miss.classList.remove('is-scared');
     miss.classList.add('is-here');
     miss.setAttribute('aria-hidden', 'false');
-    if (scare && !prefersReducedMotion) {
-      document.body.classList.add('is-glitching');
-      setTimeout(() => document.body.classList.remove('is-glitching'), 480);
+    if (scare) {
+      miss.classList.add('is-scared');
+      setTimeout(() => miss.classList.remove('is-scared'), 950);
+      if (!prefersReducedMotion) {
+        document.body.classList.add('is-glitching');
+        setTimeout(() => document.body.classList.remove('is-glitching'), 480);
+      }
     }
     // The smile turns smug shortly after arrival
     setTimeout(() => miss.classList.add('is-smug'), 1400);

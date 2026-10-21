@@ -1153,8 +1153,14 @@ body.is-glitching main { animation: pageGlitch 0.48s linear; }
 }
 .miss-pupil { transition: transform 0.25s ease; transform-box: fill-box; }
 .miss.is-smug .miss-pupil { transform: translate(1.6px, 1.8px); }
-.miss-mouth { transition: d 0.3s ease; }
-.miss.is-smug .miss-mouth { d: path("M84 128 Q104 139 118 121"); }
+.miss-brows { transition: transform 0.2s ease; }
+.miss-mouth--scare, .miss-mouth--smirk { display: none; }
+.miss.is-scared .miss-mouth--smile { display: none; }
+.miss.is-scared .miss-mouth--scare { display: block; }
+.miss.is-scared .miss-pupil { transform: scale(1.35); }
+.miss.is-scared .miss-brows { transform: translateY(-4px); }
+.miss.is-smug .miss-mouth--smile { display: none; }
+.miss.is-smug .miss-mouth--smirk { display: block; }
 
 .miss-bubble {
   position: absolute;
