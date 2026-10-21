@@ -222,18 +222,66 @@
     });
   }
 
-  /* ---------- Live X follower count ---------- */
-  (async function fetchFollowers() {
-    const els = [document.getElementById('followerCount'), document.getElementById('followerCount2')].filter(Boolean);
-    if (!els.length) return;
+  /* ---------- Live follower counts (best effort, embedded values are the fallback) ---------- */
+  function setCount(id, n) {
+    const el = document.getElementById(id);
+    if (el && Number.isFinite(n) && n >= 0) el.textContent = Number(n).toLocaleString('en-IN');
+  }
+
+  // X — syndication widget endpoint, then a public API mirror
+  (async function fetchX() {
+    if (!document.getElementById('followerCount')) return;
     try {
       const res = await fetch('https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=TheAdwaithVarma');
       if (res.ok) {
         const data = await res.json();
-        if (data && data[0] && data[0].followers_count) {
-          const label = Number(data[0].followers_count).toLocaleString();
-          els.forEach((el) => { el.textContent = label; });
-        }
+        if (data && data[0] && data[0].followers_count) { setCount('followerCount', data[0].followers_count); return; }
+      }
+    } catch (e) { /* try next source */ }
+    try {
+      const res = await fetch('https://api.fxtwitter.com/TheAdwaithVarma');
+      if (res.ok) {
+        const data = await res.json();
+        const u = data && data.user;
+        if (u) setCount('followerCount', u.followers ?? u.followers_count);
+      }
+    } catch (e) { /* keep fallback */ }
+  })();
+
+  // GitHub — public API, no key needed
+  (async function fetchGitHub() {
+    if (!document.getElementById('ghFollowers')) return;
+    try {
+      const res = await fetch('https://api.github.com/users/theadwaithvarma');
+      if (res.ok) {
+        const data = await res.json();
+        setCount('ghFollowers', data.followers);
+      }
+    } catch (e) { /* keep fallback */ }
+  })();
+
+  // Telegram — channel preview page via a text mirror (t.me itself blocks cross-origin reads)
+  (async function fetchTelegram() {
+    if (!document.getElementById('tgSubs')) return;
+    try {
+      const res = await fetch('https://r.jina.ai/https://t.me/TheAdwaithVarma');
+      if (res.ok) {
+        const text = await res.text();
+        const m = text.replace(/,/g, '').match(/(\d+)\s+subscribers/i);
+        if (m) setCount('tgSubs', parseInt(m[1], 10));
+      }
+    } catch (e) { /* keep fallback */ }
+  })();
+
+  // Instagram — profile page via a text mirror (no public API without login)
+  (async function fetchInstagram() {
+    if (!document.getElementById('igFollowers')) return;
+    try {
+      const res = await fetch('https://r.jina.ai/https://www.instagram.com/theadwaithvarma/');
+      if (res.ok) {
+        const text = await res.text();
+        const m = text.replace(/,/g, '').match(/(\d+)\s+followers/i);
+        if (m) setCount('igFollowers', parseInt(m[1], 10));
       }
     } catch (e) { /* keep fallback */ }
   })();
