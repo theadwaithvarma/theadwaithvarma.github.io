@@ -726,19 +726,30 @@
 
   /* ---------- Timeslipping (the filed photograph is unstable) ----------
      Activating the photo window — click, tap, Enter/Space, or the S key —
-     slips the whole ID card for ~700ms: stepped displacement jumps with
-     orange/green ghost echoes and a flicker, plus one dry line from the
-     office. Re-entry is guarded; every timer is tracked and cleaned up.
-     Reduced motion: no displacement, just the toast. */
+     slips the whole ID card for ~950ms, and it is a SLIP, not a shake:
+     the card melts. An SVG displacement filter (#slipWarp in index.html)
+     warps the card's own rendering while a requestAnimationFrame driver
+     ramps the displacement scale 0 → ~72 → 0 with a baseFrequency drift,
+     and a CSS elastic track squashes, stretches the card like taffy,
+     then snaps it back through two decaying wobble beats. The pull
+     direction alternates per trigger (--slip-dir). If SVG filters are
+     unavailable the elastic transforms alone still read as a stretch.
+     Re-entry is guarded; the rAF, the filter, the class, and every timer
+     are cleaned up at the end. Reduced motion: just the toast. */
   const photoWindow = document.getElementById('photoWindow');
   const slipLines = [
     'Timeslipping detected. It is not a dance move.',
     'Variant slipped 0.3 seconds. Barely worth the paperwork.',
     'Please hold still — the timeline is trying to file you.'
   ];
+  const slipTurb = document.getElementById('slipTurb');
+  const slipDisp = document.getElementById('slipDisp');
+  const SLIP_MS = 950;
   let slipIndex = 0;
   let slipping = false;
   let slipTimers = [];
+  let slipRaf = null;
+  let slipDir = -1;
 
   function slipLater(fn, delay) {
     const id = setTimeout(fn, delay);
@@ -746,11 +757,50 @@
     return id;
   }
 
+  function setSlipScale(value) {
+    if (slipDisp) slipDisp.setAttribute('scale', value.toFixed(1));
+  }
+
   function endTimeslip() {
     slipTimers.forEach((id) => clearTimeout(id));
     slipTimers = [];
-    if (idCard) idCard.classList.remove('is-timeslipping');
+    if (slipRaf !== null) { cancelAnimationFrame(slipRaf); slipRaf = null; }
+    setSlipScale(0);
+    if (idCard) {
+      idCard.classList.remove('is-timeslipping');
+      idCard.style.removeProperty('filter');
+      idCard.style.removeProperty('--slip-dir');
+    }
     slipping = false;
+  }
+
+  /* The molten envelope: a fast melt-in to the stretch peak (~34% in),
+     then an elastic decay whose sine term gives the warp two dying
+     wobbles of its own, in step with the CSS transform track. */
+  function runSlipWarp(startedAt) {
+    function frame(now) {
+      if (!slipping) return;
+      const t = Math.min((now - startedAt) / SLIP_MS, 1);
+      let env;
+      if (t < 0.34) {
+        const u = t / 0.34;
+        env = 1 - Math.pow(1 - u, 3);
+      } else {
+        const u = (t - 0.34) / 0.66;
+        env = Math.pow(1 - u, 2) * (1 + 0.35 * Math.sin(u * Math.PI * 4) * (1 - u));
+      }
+      setSlipScale(72 * Math.max(0, Math.min(env, 1)));
+      if (slipTurb) {
+        const melt = Math.sin(t * Math.PI);
+        slipTurb.setAttribute(
+          'baseFrequency',
+          (0.012 + 0.010 * melt).toFixed(4) + ' ' + (0.09 + 0.02 * Math.sin(t * Math.PI * 2)).toFixed(4)
+        );
+      }
+      if (t < 1) slipRaf = requestAnimationFrame(frame);
+      else slipRaf = null;
+    }
+    slipRaf = requestAnimationFrame(frame);
   }
 
   function startTimeslip() {
@@ -759,10 +809,16 @@
     slipIndex += 1;
     if (prefersReducedMotion) return;
     slipping = true;
+    slipDir *= -1; // the pull alternates left/right per trigger
+    idCard.style.setProperty('--slip-dir', String(slipDir));
     idCard.classList.remove('is-timeslipping');
     void idCard.offsetWidth;
     idCard.classList.add('is-timeslipping');
-    slipLater(endTimeslip, 760);
+    if (slipDisp && slipTurb) {
+      idCard.style.filter = 'url("#slipWarp")';
+      runSlipWarp(performance.now());
+    }
+    slipLater(endTimeslip, SLIP_MS + 40);
   }
 
   if (photoWindow) {
@@ -1154,7 +1210,7 @@
     tempadOpen = true;
     tempadNavigating = false;
     tempadOverlay.classList.remove('is-opening');
-    setTempadStatus('Coordinates locked to Bengaluru Branch.');
+    setTempadStatus('Coordinates locked to Kerala Branch.');
     requestAnimationFrame(() => tempadOverlay.classList.add('is-open'));
     const firstDestination = tempadOverlay.querySelector('.tempad-destination');
     if (firstDestination) firstDestination.focus({ preventScroll: true });
@@ -1169,7 +1225,7 @@
     tempadOverlay.classList.remove('is-open');
     tempadOverlay.classList.remove('is-opening');
     tempadOverlay.hidden = true;
-    setTempadStatus('Coordinates locked to Bengaluru Branch.');
+    setTempadStatus('Coordinates locked to Kerala Branch.');
     if (tempadLastFocus && typeof tempadLastFocus.focus === 'function') {
       tempadLastFocus.focus({ preventScroll: true });
     }
@@ -1261,7 +1317,7 @@
             '<div class="variant-field--wide"><dt>Department</dt><dd>' + escapeHtml(department) + '</dd></div>' +
             '<div class="variant-field--wide"><dt>Status</dt><dd>' + escapeHtml(offense) + '</dd></div>' +
           '</dl>' +
-          '<p class="variant-card-foot">Intake Nº ' + escapeHtml(variantNo) + ' · Bengaluru Branch · Forgotten on departure</p>' +
+          '<p class="variant-card-foot">Intake Nº ' + escapeHtml(variantNo) + ' · Kerala Branch · Forgotten on departure</p>' +
           '<button class="variant-reset" type="button" data-reset-variant>File another</button>' +
         '</article>';
     });

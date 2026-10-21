@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adwaith Varma — Variant E-1130 · TVA Personnel File</title>
-  <meta name="description" content="Time Variance Authority personnel file for Variant E-1130: Adwaith Varma of Bengaluru. Tester, product scout, early bird. Status: not pruned (monitored). Signal strengths recorded live.">
+  <meta name="description" content="Time Variance Authority personnel file for Variant E-1130: Adwaith Varma of Kerala. Tester, product scout, early bird. Status: not pruned (monitored). Signal strengths recorded live.">
   <!-- Open Graph -->
   <meta property="og:title" content="Adwaith Varma — Variant E-1130">
   <meta property="og:description" content="TVA personnel identification. Tester, product scout, early bird. Arrives before launch; flagged, tolerated.">
@@ -26,7 +26,7 @@
     "name": "Adwaith Varma",
     "url": "https://theadwaithvarma.github.io/",
     "jobTitle": "Tester, product scout",
-    "homeLocation": { "@type": "Place", "name": "Bengaluru, India" },
+    "homeLocation": { "@type": "Place", "name": "Kerala, India" },
     "sameAs": [
       "https://x.com/TheAdwaithVarma",
       "https://instagram.com/theadwaithvarma",
@@ -38,6 +38,18 @@
   </script>
 </head>
 <body>
+  <!-- Timeslip warp filter: melts the ID card mid-slip. JS drives the
+       displacement scale 0 → ~72 → 0 over the slip; at rest it is inert. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="slipWarp" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence id="slipTurb" type="fractalNoise" baseFrequency="0.012 0.09" numOctaves="2" seed="7" result="noise"></feTurbulence>
+        <feGaussianBlur in="noise" stdDeviation="0.6" result="softNoise"></feGaussianBlur>
+        <feDisplacementMap id="slipDisp" in="SourceGraphic" in2="softNoise" scale="0" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </defs>
+  </svg>
+
   <a class="skip" href="#file-01">Skip to the case file</a>
 
   <!-- Timeline traversal progress -->
@@ -53,7 +65,7 @@
 
   <!-- ========== TOP STRIP ========== -->
   <header class="strip">
-    <span class="strip-item">Time Variance Authority · Bengaluru Branch Office</span>
+    <span class="strip-item">Time Variance Authority · Kerala Branch Office</span>
     <span class="strip-item strip-clock">Temporal Chronometer · <span class="flap-clock" aria-hidden="true"><span class="flap-tile" id="flapH">--</span><span class="flap-colon">:</span><span class="flap-tile" id="flapM">--</span><span class="flap-colon">:</span><span class="flap-tile" id="flapS">--</span></span> <time id="chronoClock" class="sr-only" datetime="">--:--:--</time> IST <span class="bulb bulb--strip" aria-hidden="true"></span></span>
     <span class="strip-item strip-coords" aria-hidden="true">T-Coord <span id="tCoords">— · —</span></span>
     <span class="strip-item strip-motto">For All Time. Always.</span>
@@ -94,7 +106,7 @@
               <p class="band-name">Time Variance Authority</p>
               <p class="band-sub">Personnel Identification — Do Not Prune</p>
             </div>
-            <p class="band-form">Form TVA-1130<br>Rev. ∞ · BLR</p>
+            <p class="band-form">Form TVA-1130<br>Rev. ∞ · KL</p>
           </header>
 
           <div class="card-body">
@@ -115,7 +127,7 @@
                 <div class="field field--half"><dt>Given Name</dt><dd class="dd-name">Adwaith</dd></div>
                 <div class="field field--wide"><dt>Designation</dt><dd>Tester · Product Scout · Early Bird</dd></div>
                 <div class="field field--half"><dt>Variant Nº</dt><dd>E-1130</dd></div>
-                <div class="field field--half"><dt>Branch</dt><dd>Bengaluru, IN</dd></div>
+                <div class="field field--half"><dt>Branch</dt><dd>Kerala, IN</dd></div>
                 <div class="field field--wide"><dt>Department</dt><dd>Early Access &amp; Anomalous Arrivals</dd></div>
                 <div class="field field--half"><dt>Timeline of Origin</dt><dd>Earth, the interesting one</dd></div>
                 <div class="field field--half"><dt>Clearance</dt><dd><span class="chip chip--clear">Level 7 — Early Access</span></dd></div>
@@ -131,14 +143,14 @@
 
           <footer class="card-foot">
             <div class="barcode" role="img" aria-label="Barcode encoding: THEADWAITHVARMA"></div>
-            <p class="card-no">Card Nº <span class="emboss">TVA-BLR-E1130</span></p>
+            <p class="card-no">Card Nº <span class="emboss">TVA-KL-E1130</span></p>
             <p class="card-valid">Valid Thru <span class="emboss">∞</span></p>
-            <p class="card-return">If found, return to the Bengaluru Branch Office. Do not fold, spindle, or reset.</p>
+            <p class="card-return">If found, return to the Kerala Branch Office. Do not fold, spindle, or reset.</p>
           </footer>
 
           <div class="stamp" id="stamp" aria-hidden="true">
             <span class="stamp-main">Approved<br>For All Time</span>
-            <span class="stamp-sub">TVA · Bengaluru Branch</span>
+            <span class="stamp-sub">TVA · Kerala Branch</span>
           </div>
         </article>
       </div>
@@ -205,7 +217,7 @@
           <span class="file-meta">Strengths recorded live · Do not jam</span>
         </header>
 
-        <p class="report">The variant broadcasts on five known frequencies. All are intercepted below; strengths are recorded live by the Bengaluru office. The primary signal carries the launch-day reports and should be considered the authoritative feed.</p>
+        <p class="report">The variant broadcasts on five known frequencies. All are intercepted below; strengths are recorded live by the Kerala office. The primary signal carries the launch-day reports and should be considered the authoritative feed.</p>
 
         <ul class="signals" role="list">
           <li class="signal signal--featured">
@@ -306,7 +318,7 @@
           <span class="file-meta">Updated continuously · No action required</span>
         </header>
 
-        <p class="filed-line">Filed <span id="noteDate">—</span> · Local time <time id="istClock" datetime="">--:--</time> IST · Bengaluru Branch</p>
+        <p class="filed-line">Filed <span id="noteDate">—</span> · Local time <time id="istClock" datetime="">--:--</time> IST · Kerala Branch</p>
 
         <dl class="assignment">
           <div class="assign-row"><dt>Trying</dt><dd>Whatever launched this week, before the reviews land.</dd></div>
@@ -403,13 +415,13 @@
             <span class="leader-count" id="leaderCount">3</span>
           </div>
           <p class="film-kicker">TVA Orientation</p>
-          <p class="film-small">Bengaluru Branch Office · Orientation Film 1130-B</p>
+          <p class="film-small">Kerala Branch Office · Orientation Film 1130-B</p>
         </div>
 
         <div class="film-slide" data-film-slide="1">
           <p class="film-kicker">A message from the Authority</p>
           <h3>Welcome to the Time Variance Authority</h3>
-          <p>Orientation Film 1130-B · Bengaluru Branch Office</p>
+          <p>Orientation Film 1130-B · Kerala Branch Office</p>
         </div>
 
         <div class="film-slide" data-film-slide="2">
@@ -515,7 +527,7 @@
         </div>
       </div>
 
-      <p class="tempad-status" id="tempadStatus" role="status">Coordinates locked to Bengaluru Branch.</p>
+      <p class="tempad-status" id="tempadStatus" role="status">Coordinates locked to Kerala Branch.</p>
       </div>
     </div>
   </div>
@@ -538,11 +550,11 @@
 
   <!-- ========== FOOTER ========== -->
   <footer class="colophon">
-    <span class="date-stamp" aria-hidden="true">Filed · BLR</span>
-    <p>© 2026 Time Variance Authority, Bengaluru Branch (unofficial, obviously).</p>
+    <span class="date-stamp" aria-hidden="true">Filed · KL</span>
+    <p>© 2026 Time Variance Authority, Kerala Branch (unofficial, obviously).</p>
     <p>This variant’s timeline remains unpruned.</p>
     <p>No timelines were harmed in the making of this file. One jet ski was denied.</p>
-    <p class="colophon-sign">— End of file · Processed by the Bengaluru Branch Office —</p>
+    <p class="colophon-sign">— End of file · Processed by the Kerala Branch Office —</p>
     <p><a class="to-top" href="#idCard">Return to the card ↑</a></p>
   </footer>
 

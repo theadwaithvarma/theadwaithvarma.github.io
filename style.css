@@ -2218,59 +2218,67 @@ body.audit .id-card {
 .photo-window:hover {
   box-shadow: inset 0 0 0 1px rgba(239, 230, 208, .25), 0 0 0 2px rgba(232, 100, 28, .35);
 }
-.id-card.is-timeslipping { animation: timeslip .7s steps(1, end) both; }
-@keyframes timeslip {
+/* V6.7: the slip is elastic, not a shake. The transform track below
+   squashes in anticipation, stretches like taffy at the peak, then
+   snaps back through two decaying wobble beats — while the JS-driven
+   SVG displacement filter (app.js, #slipWarp) does the actual melting
+   of the card's contents. --slip-dir mirrors the pull per trigger.
+   Smooth interpolation throughout; the old steps() shake is gone. */
+.id-card.is-timeslipping { animation: timeslipElastic .95s cubic-bezier(.25, .8, .3, 1) both; }
+@keyframes timeslipElastic {
   0% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(0, 0) skewX(0deg);
-    box-shadow: var(--shadow-card), -12px 5px 0 -2px var(--slip-echo-a), 11px -6px 0 -2px var(--slip-echo-b);
-    filter: none;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1, 1) skewX(0deg);
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * -10px) 4px 6px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * 9px) -5px 6px -2px var(--slip-echo-b);
   }
-  14% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-9px, 3px) skewX(-2.5deg);
-    box-shadow: var(--shadow-card), -18px 7px 0 -2px var(--slip-echo-a), 15px -9px 0 -2px var(--slip-echo-b);
-    filter: brightness(1.06);
+  12% { /* anticipation: the card gathers itself before the pull */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1.02, .96) skewX(calc(var(--slip-dir, 1) * 1deg));
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * -13px) 5px 7px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * 11px) -6px 7px -2px var(--slip-echo-b);
   }
-  28% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(7px, -4px) skewX(1.8deg);
-    box-shadow: var(--shadow-card), 13px -6px 0 -2px var(--slip-echo-a), -12px 6px 0 -2px var(--slip-echo-b);
-    filter: none;
+  34% { /* the stretch: elongated, smeared along the pull, echoes wide */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1.16, .90) skewX(calc(var(--slip-dir, 1) * -6deg));
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * -30px) 9px 14px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * 25px) -11px 14px -2px var(--slip-echo-b);
+    opacity: .96;
   }
-  42% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-5px, -2px) skewX(-1.2deg);
-    box-shadow: var(--shadow-card), -10px 4px 0 -2px var(--slip-echo-a), 9px -4px 0 -2px var(--slip-echo-b);
-    filter: brightness(.94);
-    opacity: .88;
-  }
-  57% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(4px, 2px) skewX(.8deg);
-    box-shadow: var(--shadow-card), 8px 3px 0 -2px var(--slip-echo-a), -7px -3px 0 -2px var(--slip-echo-b);
-    filter: none;
+  52% { /* release: snapped past rest, tall and narrow */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(.965, 1.045) skewX(calc(var(--slip-dir, 1) * 2.5deg));
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * 12px) -4px 8px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * -10px) 5px 8px -2px var(--slip-echo-b);
     opacity: 1;
   }
-  71% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-2px, 1px) skewX(-.4deg);
-    box-shadow: var(--shadow-card), -5px 2px 0 -2px var(--slip-echo-a), 4px -2px 0 -2px var(--slip-echo-b);
+  68% { /* wobble, first beat */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1.03, .985) skewX(calc(var(--slip-dir, 1) * -1.4deg));
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * -9px) 3px 6px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * 8px) -3px 6px -2px var(--slip-echo-b);
   }
-  85% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(1px, 0) skewX(.15deg);
-    box-shadow: var(--shadow-card), 3px 1px 0 -2px var(--slip-echo-a), -2px -1px 0 -2px var(--slip-echo-b);
+  82% { /* wobble, second beat, dying */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(.992, 1.008) skewX(calc(var(--slip-dir, 1) * .7deg));
+    box-shadow: var(--shadow-card),
+      calc(var(--slip-dir, 1) * -5px) 2px 4px -2px var(--slip-echo-a),
+      calc(var(--slip-dir, 1) * 4px) -2px 4px -2px var(--slip-echo-b);
   }
   100% {
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(0, 0) skewX(0deg);
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1, 1) skewX(0deg);
     box-shadow: var(--shadow-card);
-    filter: none;
     opacity: 1;
   }
 }
-.id-card.is-timeslipping .photo-window img { animation: timeslipImg .7s steps(1, end) both; }
-@keyframes timeslipImg {
-  0% { transform: translate(0, 0); }
-  16% { transform: translate(5px, 0); }
-  33% { transform: translate(-4px, 1px); }
-  50% { transform: translate(3px, -1px); }
-  66% { transform: translate(-2px, 0); }
-  83% { transform: translate(1px, 0); }
-  100% { transform: translate(0, 0); }
+/* the photograph strains against the slip, a beat behind the card */
+.id-card.is-timeslipping .photo-window img { animation: timeslipImgElastic .95s cubic-bezier(.25, .8, .3, 1) both; }
+@keyframes timeslipImgElastic {
+  0% { transform: translate(0, 0) scale(1, 1); }
+  12% { transform: translate(calc(var(--slip-dir, 1) * -2px), 0) scale(.99, 1.012); }
+  34% { transform: translate(calc(var(--slip-dir, 1) * 7px), 0) scale(1.03, .985); }
+  52% { transform: translate(calc(var(--slip-dir, 1) * -4px), 0) scale(.99, 1.01); }
+  70% { transform: translate(calc(var(--slip-dir, 1) * 2px), 0) scale(1.004, .998); }
+  100% { transform: translate(0, 0) scale(1, 1); }
 }
 
 /* ---------- 2. Odometer drums (File 02 counts) ---------- */
@@ -2586,3 +2594,152 @@ body.audit .card-zone::after {
   .signal-meter::after { transition: none; }
   .odo-strip { transition: none; }
 }
+
+/* ============================================================
+   V6.7 — KERALA MOVE + SHOW-ACCURATE MATERIALS
+   The branch office relocated to Kerala (TVA-KL branch codes),
+   and the v6.6 hardware finishes were generic retro; this pass
+   re-skins them as the actual TVA props from the Loki series:
+   1970s corporate tech — warm beige and bakelite, brushed brass
+   and gold trim, walnut, burnt orange, chunky square keys with
+   amber backlight, amber monochrome screens. Finishes only:
+   no layout, no behavior changes. Screens stay amber, never cyan.
+   ============================================================ */
+
+/* ---------- TemPad: a brass-framed slab ---------- */
+.tempad-panel {
+  background:
+    linear-gradient(165deg, rgba(217, 164, 65, .20), rgba(74, 46, 21, .05) 42%, rgba(0, 0, 0, .28)),
+    linear-gradient(180deg, #2B1C0E, #190F07);
+  border: 3px solid #8A6420;
+  box-shadow:
+    0 0 0 1.5px #38260A,
+    0 0 0 4px rgba(217, 164, 65, .32),
+    0 26px 70px rgba(0, 0, 0, .65),
+    inset 0 1px 0 rgba(255, 233, 168, .38),
+    inset 0 -4px 0 rgba(0, 0, 0, .55);
+}
+.tempad-panel::before {
+  /* the bezel's machined ridge, re-struck in brass */
+  background: repeating-linear-gradient(90deg, rgba(232, 188, 98, .34) 0 3px, rgba(56, 38, 10, .25) 3px 6px, transparent 6px 10px);
+}
+.tempad-panel::after {
+  /* an engraved hairline frame just inside the bezel */
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1px solid rgba(217, 164, 65, .26);
+  border-radius: 9px;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .45);
+  pointer-events: none;
+}
+.tempad-screen {
+  background-color: rgba(24, 14, 4, .72);
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 176, 0, .10);
+}
+
+/* destination keys: chunky raised squares with an amber backlight */
+.tempad-destination {
+  border: 1.5px solid rgba(217, 164, 65, .55);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #4C3216 0%, #33200F 55%, #261605 100%);
+  box-shadow:
+    0 5px 0 #140B03,
+    0 8px 14px rgba(0, 0, 0, .5),
+    inset 0 1px 0 rgba(255, 233, 168, .38),
+    inset 0 -2px 0 rgba(0, 0, 0, .5);
+}
+.tempad-destination:hover,
+.tempad-destination:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--amber);
+  background: linear-gradient(180deg, #5D3D19 0%, #3E2810 55%, #2E1C07 100%);
+  box-shadow:
+    0 6px 0 #140B03,
+    0 9px 16px rgba(0, 0, 0, .5),
+    0 0 20px rgba(255, 176, 0, .38),
+    inset 0 1px 0 rgba(255, 233, 168, .5),
+    inset 0 -2px 0 rgba(0, 0, 0, .5);
+}
+.tempad-destination:active {
+  transform: translateY(3px);
+  border-color: var(--amber);
+  background: linear-gradient(180deg, #68451C 0%, #473013 55%, #33200B 100%);
+  box-shadow:
+    0 2px 0 #140B03,
+    0 4px 8px rgba(0, 0, 0, .5),
+    0 0 30px rgba(255, 176, 0, .60),
+    inset 0 1px 0 rgba(255, 233, 168, .55),
+    inset 0 -1px 0 rgba(0, 0, 0, .5);
+}
+
+/* ---------- Chronometer: walnut housing, brass screws ---------- */
+.flap-clock {
+  padding: 4px 8px;
+  border: 1px solid rgba(23, 16, 10, .85);
+  border-radius: 4px;
+  background-color: #3E2812;
+  background-image:
+    radial-gradient(circle at 6px 6px, #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at calc(100% - 6px) 6px, #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at 6px calc(100% - 6px), #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
+    linear-gradient(180deg, #5D3E22 0%, #402A13 58%, #2E1D0C 100%);
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 233, 168, .30),
+    inset 0 -2px 3px rgba(0, 0, 0, .55),
+    0 1px 2px rgba(36, 26, 18, .35);
+}
+
+/* ---------- Signals: warm cream enamel wall instruments ---------- */
+body:not(.audit) .signal {
+  background-image: linear-gradient(180deg, rgba(255, 253, 242, .55), rgba(255, 253, 242, 0) 36%);
+}
+.signal--featured { position: relative; }
+.signal--featured::before,
+.signal--featured::after {
+  /* brass screw dots in the featured panel's corners */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  z-index: 2;
+  pointer-events: none;
+  background-repeat: no-repeat;
+}
+.signal--featured::before {
+  top: 5px;
+  background-image:
+    radial-gradient(circle at 15px 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 9px) 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
+}
+.signal--featured::after {
+  bottom: 5px;
+  background-image:
+    radial-gradient(circle at 15px 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 9px) 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
+}
+
+/* ---------- Buttons: squarer, with an amber indicator notch ---------- */
+.btn, .audit-btn, .film-control, .variant-reset { border-radius: 3px; }
+.tempad-destination { border-radius: 6px; } /* the TemPad keys keep their chunkier radius */
+.btn--solid { position: relative; padding-left: 1.6rem; }
+.btn--solid::before,
+.prune-btn::before {
+  /* a lit amber indicator bar set into the control's left edge */
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 54%;
+  border-radius: 1px;
+  background: var(--amber);
+  box-shadow: 0 0 7px rgba(255, 176, 0, .65), inset 0 0 1px rgba(90, 50, 0, .6);
+  pointer-events: none;
+}
+.btn--solid::before { left: .6rem; }
+.prune-btn { position: relative; padding-left: 1.75rem; }
+.prune-btn::before { left: .65rem; }
