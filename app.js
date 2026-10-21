@@ -223,19 +223,21 @@
   }
 
   /* ---------- Live follower counts (best effort, embedded values are the fallback) ---------- */
-  function setCount(id, n) {
-    const el = document.getElementById(id);
-    if (el && Number.isFinite(n) && n >= 0) el.textContent = Number(n).toLocaleString('en-IN');
+  const compactFmt = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  function setLive(key, n) {
+    if (!Number.isFinite(n) || n < 0) return;
+    document.querySelectorAll('[data-live="' + key + '"]').forEach((el) => {
+      el.textContent = el.hasAttribute('data-compact') ? compactFmt.format(n) : Number(n).toLocaleString('en-IN');
+    });
   }
 
   // X — syndication widget endpoint, then a public API mirror
   (async function fetchX() {
-    if (!document.getElementById('followerCount')) return;
     try {
       const res = await fetch('https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=TheAdwaithVarma');
       if (res.ok) {
         const data = await res.json();
-        if (data && data[0] && data[0].followers_count) { setCount('followerCount', data[0].followers_count); return; }
+        if (data && data[0] && data[0].followers_count) { setLive('x', data[0].followers_count); return; }
       }
     } catch (e) { /* try next source */ }
     try {
@@ -243,48 +245,110 @@
       if (res.ok) {
         const data = await res.json();
         const u = data && data.user;
-        if (u) setCount('followerCount', u.followers ?? u.followers_count);
+        if (u) setLive('x', u.followers ?? u.followers_count);
       }
     } catch (e) { /* keep fallback */ }
   })();
 
   // GitHub — public API, no key needed
   (async function fetchGitHub() {
-    if (!document.getElementById('ghFollowers')) return;
     try {
       const res = await fetch('https://api.github.com/users/theadwaithvarma');
       if (res.ok) {
         const data = await res.json();
-        setCount('ghFollowers', data.followers);
+        setLive('gh', data.followers);
       }
     } catch (e) { /* keep fallback */ }
   })();
 
   // Telegram — channel preview page via a text mirror (t.me itself blocks cross-origin reads)
   (async function fetchTelegram() {
-    if (!document.getElementById('tgSubs')) return;
     try {
       const res = await fetch('https://r.jina.ai/https://t.me/TheAdwaithVarma');
       if (res.ok) {
         const text = await res.text();
         const m = text.replace(/,/g, '').match(/(\d+)\s+subscribers/i);
-        if (m) setCount('tgSubs', parseInt(m[1], 10));
+        if (m) setLive('tg', parseInt(m[1], 10));
       }
     } catch (e) { /* keep fallback */ }
   })();
 
   // Instagram — profile page via a text mirror (no public API without login)
   (async function fetchInstagram() {
-    if (!document.getElementById('igFollowers')) return;
     try {
       const res = await fetch('https://r.jina.ai/https://www.instagram.com/theadwaithvarma/');
       if (res.ok) {
         const text = await res.text();
         const m = text.replace(/,/g, '').match(/(\d+)\s+followers/i);
-        if (m) setCount('igFollowers', parseInt(m[1], 10));
+        if (m) setLive('ig', parseInt(m[1], 10));
       }
     } catch (e) { /* keep fallback */ }
   })();
+
+  /* ---------- Lock screen ---------- */
+  const lockEl = document.getElementById('lock');
+  const homeEl = document.getElementById('home');
+  const lockClock = document.getElementById('lockClock');
+  const lockDate = document.getElementById('lockDate');
+  const lockGreeting = document.getElementById('lockGreeting');
+
+  function istNow() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  }
+
+  function tickLock() {
+    if (!lockClock) return;
+    const d = istNow();
+    const h = d.getHours();
+    lockClock.textContent = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/\s?[ap]m/i, '');
+    if (lockDate) {
+      lockDate.textContent = d.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+    if (lockGreeting) {
+      lockGreeting.textContent =
+        h < 5 ? 'up late, as usual' :
+        h < 11 ? 'early, like always' :
+        h < 17 ? 'around' :
+        h < 22 ? 'around this evening' : 'still up';
+    }
+    root.setAttribute('data-phase', h < 6 ? 'night' : h < 11 ? 'morning' : h < 17 ? 'day' : h < 20 ? 'evening' : 'night');
+  }
+  if (lockClock) { tickLock(); setInterval(tickLock, 1000); }
+
+  let unlocked = false;
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    document.body.classList.remove('is-locked');
+    document.body.classList.add('is-unlocked');
+    if (homeEl) homeEl.setAttribute('aria-hidden', 'false');
+    if (lockEl) lockEl.setAttribute('aria-hidden', 'true');
+  }
+  function relock() {
+    if (!unlocked) return;
+    unlocked = false;
+    scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    document.body.classList.add('is-locked');
+    document.body.classList.remove('is-unlocked');
+    if (homeEl) homeEl.setAttribute('aria-hidden', 'true');
+    if (lockEl) lockEl.setAttribute('aria-hidden', 'false');
+  }
+
+  const unlockBtn = document.getElementById('unlockBtn');
+  if (unlockBtn) unlockBtn.addEventListener('click', unlock);
+  addEventListener('wheel', (e) => { if (!unlocked && e.deltaY > 4) unlock(); }, { passive: true });
+  let touchStartY = null;
+  addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+  addEventListener('touchmove', (e) => {
+    if (!unlocked && touchStartY !== null && touchStartY - e.touches[0].clientY > 40) unlock();
+  }, { passive: true });
+  addEventListener('keydown', (e) => {
+    if (!unlocked && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown')) unlock();
+  });
+  const relockBtn = document.getElementById('relockBtn');
+  if (relockBtn) relockBtn.addEventListener('click', relock);
+  const relockBrand = document.getElementById('relockBrand');
+  if (relockBrand) relockBrand.addEventListener('click', (e) => { e.preventDefault(); relock(); });
 
   /* ---------- Konami easter egg ---------- */
   const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
