@@ -1,4 +1,4 @@
-/* Plate Nº 01 — interactions. Vanilla JS, no dependencies. */
+/* TVA Personnel File — Variant E-1130. Vanilla JS, no dependencies. */
 (function () {
   'use strict';
 
@@ -15,51 +15,74 @@
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach((el) => io.observe(el));
   } else {
     revealEls.forEach((el) => el.classList.add('is-visible'));
   }
 
-  /* ---------- Magnifier lens cursor ---------- */
-  const lens = document.getElementById('lens');
-  if (lens && canHover && !prefersReducedMotion) {
-    let mx = -100, my = -100, lx = -100, ly = -100, scale = 1, targetScale = 1;
-    addEventListener('mousemove', (e) => {
-      mx = e.clientX;
-      my = e.clientY;
-      lens.classList.add('is-on');
-    }, { passive: true });
-    (function loop() {
-      lx += (mx - lx) * 0.2;
-      ly += (my - ly) * 0.2;
-      scale += (targetScale - scale) * 0.18;
-      const half = 17 * scale;
-      lens.style.transform =
-        'translate(' + (lx - half) + 'px,' + (ly - half) + 'px) scale(' + scale.toFixed(3) + ')';
-      requestAnimationFrame(loop);
-    })();
-    document.querySelectorAll('a, button').forEach((el) => {
-      el.addEventListener('mouseenter', () => { targetScale = 1.55; });
-      el.addEventListener('mouseleave', () => { targetScale = 1; });
-    });
-  } else if (lens) {
-    lens.style.display = 'none';
+  /* ---------- The stamp ---------- */
+  const stamp = document.getElementById('stamp');
+  const cardScene = document.getElementById('cardScene');
+  if (stamp) {
+    if (prefersReducedMotion) {
+      stamp.classList.add('is-stamped');
+      stamp.style.animation = 'none';
+      stamp.style.opacity = '.94';
+      stamp.style.transform = 'rotate(-12deg) scale(1)';
+    } else {
+      setTimeout(() => {
+        stamp.classList.add('is-stamped');
+        if (cardScene) {
+          cardScene.classList.add('is-jolt');
+          setTimeout(() => cardScene.classList.remove('is-jolt'), 380);
+        }
+      }, 450);
+    }
   }
 
-  /* ---------- Live IST clock + date ---------- */
-  const plateClock = document.getElementById('plateClock');
+  /* ---------- Card tilt ---------- */
+  const idCard = document.getElementById('idCard');
+  if (idCard && cardScene && canHover && !prefersReducedMotion) {
+    let rafPending = false;
+    cardScene.addEventListener('pointermove', (e) => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        const r = idCard.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        idCard.style.setProperty('--ry', (px * 5).toFixed(2) + 'deg');
+        idCard.style.setProperty('--rx', (-py * 5).toFixed(2) + 'deg');
+        rafPending = false;
+      });
+    });
+    cardScene.addEventListener('pointerleave', () => {
+      idCard.style.setProperty('--rx', '0deg');
+      idCard.style.setProperty('--ry', '0deg');
+    });
+  }
+
+  /* ---------- Redactions (tap toggles; hover/focus handled in CSS) ---------- */
+  document.querySelectorAll('.redact').forEach((el) => {
+    el.addEventListener('click', () => {
+      el.classList.toggle('is-revealed');
+    });
+  });
+
+  /* ---------- Temporal chronometer + file date (IST) ---------- */
+  const chronoClock = document.getElementById('chronoClock');
   const istClock = document.getElementById('istClock');
   const noteDate = document.getElementById('noteDate');
 
   function tickClock() {
     try {
       const now = new Date();
-      if (plateClock) {
-        plateClock.textContent = now.toLocaleTimeString('en-IN', {
+      if (chronoClock) {
+        chronoClock.textContent = now.toLocaleTimeString('en-IN', {
           timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
-        plateClock.setAttribute('datetime', now.toISOString());
+        chronoClock.setAttribute('datetime', now.toISOString());
       }
       if (istClock) {
         istClock.textContent = now.toLocaleTimeString('en-IN', {
@@ -74,7 +97,7 @@
       }
     } catch (e) { /* leave the printed defaults */ }
   }
-  if (plateClock || istClock || noteDate) {
+  if (chronoClock || istClock || noteDate) {
     tickClock();
     setInterval(tickClock, 1000);
   }
@@ -113,7 +136,7 @@
     });
   }
 
-  /* ---------- Live counts (best effort; printed figures are the fallback) ---------- */
+  /* ---------- Live signal strengths (best effort; printed figures are the fallback) ---------- */
   function setLive(key, n) {
     if (!Number.isFinite(n) || n < 0) return;
     document.querySelectorAll('[data-live="' + key + '"]').forEach((el) => {
