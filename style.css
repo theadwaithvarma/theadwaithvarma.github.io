@@ -1894,6 +1894,101 @@ body.is-pruning .loom-tape {
   to { opacity: 0.94; transform: translate(var(--sx), var(--sy)) rotate(var(--rot)) scale(1); }
 }
 
+/* In the terminated hold the thread itself is a way back: an invisible
+   hit band around the 2px line, pointer-live only while terminated. */
+body.is-terminated .prune-thread {
+  pointer-events: auto;
+  cursor: pointer;
+}
+body.is-terminated .prune-thread::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -16px;
+  bottom: -16px;
+}
+
+/* Manual restoration (v6.8): the control that appears under the stamp
+   once the branch has terminated. Fixed center, below the verdict;
+   hidden and inert until JS adds .is-visible. */
+.prune-restore {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 3.6rem);
+  z-index: 121;
+  transform: translate(-50%, 10px);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+}
+.prune-restore.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.prune-restore-hint {
+  margin: 0 0 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.prune-restore-btn {
+  position: relative;
+  isolation: isolate;
+  font-family: var(--font-grotesque);
+  font-weight: 900;
+  font-size: clamp(0.95rem, 2.6vw, 1.2rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--card);
+  background: var(--ink);
+  border: 2px solid var(--wood-deep);
+  border-radius: 3px;
+  padding: 0.85rem 1.45rem 0.85rem 1.75rem;
+  box-shadow: 0 5px 0 rgba(36, 26, 18, 0.55);
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+/* lit amber indicator notch, matching the v6.7 primary controls */
+.prune-restore-btn::before {
+  content: "";
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 54%;
+  border-radius: 1px;
+  background: var(--amber);
+  box-shadow: 0 0 7px rgba(255, 176, 0, .65), inset 0 0 1px rgba(90, 50, 0, .6);
+  pointer-events: none;
+}
+/* the gentle pulse is a glow layer's opacity, never layout or the
+   button's own press transform */
+.prune-restore-btn::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: 4px;
+  box-shadow: 0 0 26px 8px rgba(255, 176, 0, 0.55);
+  opacity: 0.35;
+  animation: restoreGlowPulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.prune-restore-btn:hover { transform: translateY(-1px); filter: brightness(1.12); }
+.prune-restore-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(36, 26, 18, 0.55); }
+@keyframes restoreGlowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.85; }
+}
+
 /* Erosion states, applied region by region (footer first, strip last).
    The dissolved end-state is declared !important so it wins over the
    sections' own reveal/tilt transforms and opacities for its half-second;
@@ -1910,6 +2005,9 @@ body.is-pruning .loom-tape {
   transform: translateY(-8px) !important;
   filter: blur(3px) sepia(0.55) brightness(1.25) !important;
   transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease !important;
+  /* v6.8: the void can now hold indefinitely, so dissolved regions must
+     be inert, not just invisible — no clicking ghost buttons in the dark */
+  pointer-events: none !important;
 }
 /* Restore uses the paper-feed timing: declared after .eroding so its
    transition governs the trip back while both classes are present. */
@@ -2108,6 +2206,9 @@ body.is-pruning .loom-tape {
   .eroding { filter: none !important; transform: none !important; }
   .prune-thread.is-visible { animation: none; }
   .prune-hud-bar span.is-draining { transition-duration: 1.1s; }
+  /* manual restoration, calmed: no glow pulse, the control simply appears */
+  .prune-restore-btn::after { animation: none; }
+  .prune-restore { transition-duration: 0.01ms; }
   .variant-stamp { animation-duration: 0.01ms !important; }
 }
 

@@ -972,10 +972,15 @@
   /* ---------- Prune Variant (absolutely do not press) ----------
      Choreographed erosion: the reset charge arms, the page burns away
      bottom-to-top behind a rising erosion front, one loom thread holds
-     in the void, the verdict stamps land, and the Authority restores
-     the branch top-down. Every step runs on tracked timers; Escape or a
-     click (after a 1s grace) aborts, and a failsafe guarantees the page
-     can never be left pruned. */
+     in the void, the verdict stamp lands — and there it STAYS. Since
+     v6.8 the branch is never restored automatically: the terminated
+     hold persists until the visitor restores it by hand (the Restore
+     Branch control, a click on the thread itself, or the R key).
+     Escape or a click (after a 1s grace) aborts only mid-sequence; in
+     the hold they do nothing. A narrowed failsafe (see pruneFailsafe)
+     guarantees coherence only: an error mid-sequence jumps to the
+     terminated state rather than leaving a half-dissolved page with
+     no way back. */
   const pruneBtn = document.getElementById('pruneBtn');
   const pruneVeil = document.getElementById('pruneVeil');
   const pruneHud = document.getElementById('pruneHud');
@@ -986,20 +991,37 @@
   const pruneThread = document.getElementById('pruneThread');
   const pruneStampRed = document.getElementById('pruneStampRed');
   const pruneStampAmber = document.getElementById('pruneStampAmber');
+  const pruneRestore = document.getElementById('pruneRestore');
+  const pruneRestoreBtn = document.getElementById('pruneRestoreBtn');
   let pruning = false;
+  let pruneTerminated = false;
+  let pruneRestoring = false;
   let pruneAbortReadyAt = 0;
   let pruneTimers = [];
   let pruneVeilTimer = null;
 
   // Reduced motion compresses the sequence (~60%) and drops the glitch.
+  // `failsafe` is now only the coherence-watchdog deadline (see startPrune).
   const PRUNE_T = prefersReducedMotion
-    ? { arm: 300, step: 90, glitch: 0, count: 330, voidAt: 1400, restoreAt: 1800, restoreSpan: 600, failsafe: 4200 }
-    : { arm: 500, step: 150, glitch: 130, count: 550, voidAt: 2300, restoreAt: 2950, restoreSpan: 850, failsafe: 5500 };
+    ? { arm: 300, step: 90, glitch: 0, count: 330, voidAt: 1400, restoreSpan: 600, failsafe: 4200 }
+    : { arm: 500, step: 150, glitch: 130, count: 550, voidAt: 2300, restoreSpan: 850, failsafe: 5500 };
 
   function pruneLater(fn, delay) {
-    const id = setTimeout(fn, delay);
+    const id = setTimeout(() => {
+      try { fn(); } catch (err) { pruneFailsafe(); }
+    }, delay);
     pruneTimers.push(id);
     return id;
+  }
+
+  // Narrowed failsafe: a mid-sequence error must still land somewhere
+  // coherent — the terminated state (with its restore control), or a
+  // snap-back if the error hit during restoration. It never restores
+  // the page on its own once the branch has terminated.
+  function pruneFailsafe() {
+    if (!pruning) return;
+    if (pruneRestoring) { restorePrune(false); return; }
+    if (!pruneTerminated) enterTerminated();
   }
 
   function clearPruneTimers() {
@@ -1049,8 +1071,13 @@
     } catch (e) { /* silence is also very TVA */ }
   }
 
+  function hideRestoreControl() {
+    if (pruneRestore) pruneRestore.classList.remove('is-visible');
+  }
+
   function clearPruneStageFx() {
     document.body.classList.remove('is-pruning');
+    document.body.classList.remove('is-terminated');
     if (pruneHud) pruneHud.classList.remove('is-visible');
     if (pruneHudBarFill) pruneHudBarFill.classList.remove('is-draining');
     if (pruneFront) pruneFront.classList.remove('is-sweeping');
@@ -1067,10 +1094,13 @@
     pruneVeilTimer = setTimeout(() => pruneVeil.classList.remove('is-restored'), 900);
   }
 
-  // Natural completion: the choreographed restore has already run.
+  // Natural completion: the (visitor-triggered) restore has already run.
   function finishPrune() {
     if (!pruning) return;
     pruning = false;
+    pruneTerminated = false;
+    pruneRestoring = false;
+    hideRestoreControl();
     clearPruneTimers();
     clearPruneStageFx();
     pruneTargets().forEach((el) => el.classList.remove('eroding', 'erode-glitch'));
@@ -1078,14 +1108,20 @@
       pruneTargets().forEach((el) => el.classList.remove('is-refeeding'));
     }, 800);
     if (pruneVeil) pruneVeil.classList.remove('is-active');
-    if (pruneBtn) pruneBtn.disabled = false;
+    if (pruneBtn) {
+      pruneBtn.disabled = false;
+      pruneBtn.focus({ preventScroll: true }); // hand focus back to the control that started it
+    }
     showToast('Timeline restored.');
   }
 
-  // Abort path: snap everything back, no questions asked.
+  // Abort path (mid-sequence only): snap everything back, no questions asked.
   function restorePrune(showNotice) {
     if (!pruning) return;
     pruning = false;
+    pruneTerminated = false;
+    pruneRestoring = false;
+    hideRestoreControl();
     clearPruneTimers();
     const targets = pruneTargets();
     targets.forEach((el) => el.classList.add('is-refeeding'));
@@ -1122,9 +1158,48 @@
     pruneLater(finishPrune, PRUNE_T.restoreSpan);
   }
 
+  // Phase 4 — TERMINATED HOLD: the void completes, then nothing else is
+  // scheduled. Regions stay dissolved, the thread keeps its slow pulse,
+  // the red stamp stays down, and the page waits for the visitor. The
+  // visual completion is idempotent so the failsafe path lands in the
+  // exact same state even if some regions never eroded.
+  function enterTerminated() {
+    if (!pruning || pruneTerminated || pruneRestoring) return;
+    pruneTerminated = true;
+    pruneTargets().forEach((el) => {
+      el.classList.remove('erode-glitch');
+      el.classList.add('eroding');
+    });
+    if (pruneThread) pruneThread.classList.add('is-visible');
+    if (pruneStampRed) pruneStampRed.classList.add('is-slammed');
+    setPruneHud('Branch E-1130 · Terminated', '');
+    document.body.classList.add('is-terminated');
+    clearPruneTimers();
+    showToast('Branch terminated. Restore it yourself.');
+    pruneLater(showRestoreControl, 400);
+  }
+
+  function showRestoreControl() {
+    if (!pruneTerminated || pruneRestoring) return;
+    if (pruneRestore) pruneRestore.classList.add('is-visible');
+    if (pruneRestoreBtn) pruneRestoreBtn.focus({ preventScroll: true });
+  }
+
+  // The visitor pulls the thread: the v6.5 restore choreography, fired
+  // by hand (button, thread click, or R) instead of by a timer.
+  function beginRestore() {
+    if (!pruning || !pruneTerminated || pruneRestoring) return;
+    pruneRestoring = true;
+    hideRestoreControl();
+    restoreSequence();
+  }
+
   function startPrune() {
     if (pruning) return;
     pruning = true;
+    pruneTerminated = false;
+    pruneRestoring = false;
+    hideRestoreControl();
     pruneAbortReadyAt = performance.now() + 1000;
     if (pruneBtn) pruneBtn.disabled = true;
     if (pruneVeil) {
@@ -1162,21 +1237,32 @@
       }, PRUNE_T.arm + i * PRUNE_T.step);
     });
 
-    // Phase 3 — VOID: one thread holds; the verdict lands.
+    // Phase 3 — VOID: one thread holds; the verdict lands; the hold begins.
     pruneLater(() => {
       if (pruneThread) pruneThread.classList.add('is-visible');
       if (pruneStampRed) pruneStampRed.classList.add('is-slammed');
       setPruneHud('Branch E-1130 · Terminated', '');
+      enterTerminated();
     }, PRUNE_T.voidAt);
 
-    // Phase 4 — RESTORE (choreographed), plus the unconditional failsafe.
-    pruneLater(restoreSequence, PRUNE_T.restoreAt);
-    pruneLater(() => restorePrune(false), PRUNE_T.failsafe);
+    // Coherence watchdog: if the sequence somehow never reached the
+    // terminated state, jump there. It can never restore the page —
+    // after termination it is a permanent no-op and the hold persists.
+    pruneLater(() => {
+      if (pruning && !pruneTerminated && !pruneRestoring) enterTerminated();
+    }, PRUNE_T.failsafe);
   }
 
   if (pruneBtn) pruneBtn.addEventListener('click', startPrune);
+  if (pruneRestoreBtn) pruneRestoreBtn.addEventListener('click', beginRestore);
+  if (pruneThread) pruneThread.addEventListener('click', () => {
+    if (pruneTerminated) beginRestore();
+  });
   document.addEventListener('click', () => {
-    if (pruning && performance.now() >= pruneAbortReadyAt) restorePrune(false);
+    // Abort is a mid-sequence privilege only: once the branch has
+    // terminated (or restoration is under way), clicks do nothing —
+    // restoring must be a deliberate act.
+    if (pruning && !pruneTerminated && !pruneRestoring && performance.now() >= pruneAbortReadyAt) restorePrune(false);
   });
 
   /* ---------- TemPad ---------- */
@@ -1325,7 +1411,9 @@
     if (e.key === 'Escape') {
       if (filmOpen) { closeFilm(); return; }
       if (tempadOpen) { closeTempad(); return; }
-      if (pruning) { restorePrune(false); return; }
+      // Mid-sequence Escape aborts; in the terminated hold it does
+      // nothing — only a deliberate restore brings the branch back.
+      if (pruning && !pruneTerminated) { restorePrune(false); return; }
     }
     const target = e.target;
     const typing = target && (
@@ -1341,6 +1429,10 @@
     if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !e.altKey && !typing && !filmOpen && !tempadOpen) {
       e.preventDefault();
       startTimeslip();
+    }
+    if ((e.key === 'r' || e.key === 'R') && !e.ctrlKey && !e.metaKey && !e.altKey && !typing && pruneTerminated && !pruneRestoring) {
+      e.preventDefault();
+      beginRestore();
     }
   });
 

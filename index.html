@@ -548,6 +548,14 @@
     <div class="prune-stamp prune-stamp--amber" id="pruneStampAmber">Restored</div>
   </div>
 
+  <!-- Manual restoration (v6.8): lives OUTSIDE the aria-hidden stage so the
+       button is a real, focusable control. Shown only in the terminated
+       hold; the Authority no longer restores the branch for you. -->
+  <div class="prune-restore" id="pruneRestore">
+    <p class="prune-restore-hint">One thread remains. Pull it.</p>
+    <button class="prune-restore-btn" id="pruneRestoreBtn" type="button">Restore Branch E-1130</button>
+  </div>
+
   <!-- ========== FOOTER ========== -->
   <footer class="colophon">
     <span class="date-stamp" aria-hidden="true">Filed · KL</span>
