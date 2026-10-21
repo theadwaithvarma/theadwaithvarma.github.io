@@ -30,6 +30,19 @@
 
   --shadow-card: 0 1px 2px rgba(36,26,18,.18), 0 12px 32px -8px rgba(36,26,18,.35);
   --shadow-doc: 5px 6px 0 rgba(36,26,18,.14);
+
+  /* Motion tokens (v6.9) — harvested from the values this site already
+     repeated most: 60ms is the house press, (.2,.7,.2,1) was the
+     de-facto paper ease long before it had a name. Everything new
+     animates on these; calibrated set pieces (prune, timeslip,
+     odometers) keep their own timings as documented exceptions. */
+  --dur-0: 60ms;   /* mechanical contact: the press itself */
+  --dur-1: 200ms;  /* small state changes: hovers, notches, fills */
+  --dur-2: 320ms;  /* panels, toasts, overlays */
+  --dur-3: 600ms;  /* paper moves: reveals, the boot feed */
+  --ease-paper: cubic-bezier(.2, .7, .2, 1);   /* smooth decel: paper settling */
+  --ease-snap: cubic-bezier(.2, 1.35, .35, 1); /* overshoot: stamps striking */
+  --ease-mech: cubic-bezier(.3, .7, .3, 1);    /* hardware travel: keys, seals */
 }
 
 * { box-sizing: border-box; }
@@ -99,7 +112,7 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
 html.js .reveal {
   opacity: 0;
   transform: translateY(14px) rotate(.4deg);
-  transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1);
+  transition: opacity var(--dur-3) ease, transform var(--dur-3) var(--ease-paper);
 }
 html.js .reveal.is-visible { opacity: 1; transform: none; }
 
@@ -435,7 +448,7 @@ html.js .stamp {
   transform: rotate(-12deg) scale(1.7);
 }
 html.js .stamp.is-stamped {
-  animation: slam .38s cubic-bezier(.2, 1.35, .35, 1) forwards;
+  animation: slam .38s var(--ease-snap) forwards;
 }
 @keyframes slam {
   0% { opacity: 0; transform: rotate(-12deg) scale(1.7); }
@@ -600,7 +613,7 @@ html.js .file.reveal.is-visible { transform: rotate(0); }
   padding: .02em .38em;
   margin: 0 .05em;
   cursor: help;
-  transition: background .25s ease, color .25s ease;
+  transition: background var(--dur-1) ease, color var(--dur-1) ease;
   -webkit-tap-highlight-color: transparent;
 }
 .redact:hover, .redact:focus-visible, .redact.is-revealed {
@@ -649,7 +662,7 @@ html.js .file.reveal.is-visible { transform: rotate(0); }
 .signal {
   border: 1.5px solid var(--ink);
   background: var(--card);
-  transition: transform .25s ease, box-shadow .25s ease, background-color .5s ease, color .5s ease, border-color .5s ease;
+  transition: transform var(--dur-2) var(--ease-paper), box-shadow var(--dur-2) var(--ease-paper), background-color .5s ease, color .5s ease, border-color .5s ease;
 }
 .signal:hover { transform: translate(-2px, -2px); box-shadow: 4px 5px 0 rgba(36,26,18,.18); }
 .signal:active { transform: translateY(1px); box-shadow: none; }
@@ -791,12 +804,12 @@ html.js .file.reveal.is-visible { transform: rotate(0); }
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
-  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  transition: transform var(--dur-1) ease, box-shadow var(--dur-1) ease, background var(--dur-1) ease;
 }
 .btn--solid { background: var(--ink); color: var(--card); }
 .btn--ghost { background: transparent; color: var(--ink); }
 .btn:hover { transform: translate(-2px, -2px); box-shadow: 3px 4px 0 rgba(36,26,18,.3); }
-.btn:active { transform: translateY(1px); box-shadow: none; transition-duration: 60ms; }
+.btn:active { transform: translateY(1px); box-shadow: none; transition-duration: var(--dur-0); }
 
 /* ---------- Footer ---------- */
 .colophon {
@@ -853,7 +866,7 @@ html.js .file.reveal.is-visible { transform: rotate(0); }
   box-shadow: 0 8px 24px rgba(34,26,20,.35);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .3s ease, transform .3s ease;
+  transition: opacity var(--dur-2) ease, transform var(--dur-2) var(--ease-paper);
   z-index: 80;
   max-width: calc(100vw - 2rem);
   text-align: center;
@@ -1036,7 +1049,7 @@ main.is-nudged { animation: stampNudge 0.12s ease-out; }
   border-radius: 3px;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 1.1s cubic-bezier(.2, .7, .2, 1);
+  transition: transform 1.1s var(--ease-paper);
 }
 .signal--featured .signal-fill { background: var(--orange); }
 .signal.is-updated { animation: signalPulse 1.2s ease; }
@@ -1061,7 +1074,7 @@ main.is-nudged { animation: stampNudge 0.12s ease-out; }
   border-radius: 3px;
   padding: 0.4rem 0.7rem;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background var(--dur-1) ease, color var(--dur-1) ease;
 }
 .audit-btn:hover { background: var(--ink); color: var(--card); }
 @media (max-width: 900px) { .strip-coords { display: none; } }
@@ -1167,25 +1180,28 @@ body.audit .audit-btn { background: var(--orange); border-color: var(--orange); 
 }
 .marquee-track i { color: var(--orange); font-style: normal; font-size: 0.8em; align-self: center; }
 
-/* Card deal-in + field stagger */
-.card-scene.is-dealt { animation: dealIn 0.85s cubic-bezier(.2, .8, .25, 1) both; }
+/* Card feed-in + field stagger (v6.9: choreographed to a budget —
+   the card feeds from the feed slot at the top and settles by ~0.72s,
+   the last field lands ~1.02s, and the stamp strikes last at ~1.16s;
+   see the boot timeline in DESIGN.md V6.9) */
+.card-scene.is-dealt { animation: dealIn var(--dur-3) var(--ease-paper) both; }
 @keyframes dealIn {
-  from { transform: translateY(52px) rotate(1.4deg); opacity: 0; }
+  from { transform: translateY(-30px) rotate(-.7deg); opacity: 0; }
   to { transform: translateY(0) rotate(0); opacity: 1; }
 }
 html.js .fields .field { opacity: 0; transform: translateY(8px); }
 html.js .card-scene.is-dealt .fields .field {
-  animation: fieldIn 0.55s cubic-bezier(.2, .7, .2, 1) forwards;
+  animation: fieldIn .35s var(--ease-paper) forwards;
 }
-html.js .card-scene.is-dealt .fields .field:nth-child(1) { animation-delay: 0.45s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(2) { animation-delay: 0.52s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(3) { animation-delay: 0.59s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(4) { animation-delay: 0.66s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(5) { animation-delay: 0.73s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(6) { animation-delay: 0.80s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(7) { animation-delay: 0.87s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(8) { animation-delay: 0.94s; }
-html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 1.01s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(1) { animation-delay: 0.15s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(2) { animation-delay: 0.20s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(3) { animation-delay: 0.25s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(4) { animation-delay: 0.30s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(5) { animation-delay: 0.35s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(6) { animation-delay: 0.40s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(7) { animation-delay: 0.45s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(8) { animation-delay: 0.50s; }
+html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55s; }
 @keyframes fieldIn {
   to { opacity: 1; transform: translateY(0); }
 }
@@ -1225,7 +1241,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 1.01
 
 /* The seal is pressable */
 .seal { cursor: pointer; }
-.seal.is-spinning { animation: sealSpin 0.7s cubic-bezier(.3, .7, .3, 1); }
+.seal.is-spinning { animation: sealSpin 0.7s var(--ease-mech); }
 @keyframes sealSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -1318,7 +1334,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 1.01
   padding: clamp(0.75rem, 3vw, 2rem);
   background: rgba(10, 7, 5, 0.82);
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transition: opacity var(--dur-2) ease;
 }
 .overlay[hidden] { display: none !important; }
 .overlay.is-open { opacity: 1; }
@@ -1346,7 +1362,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 1.01
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(241, 231, 208, 0.16);
   padding: clamp(0.9rem, 2.5vw, 1.4rem);
   transform: translateY(12px) scale(0.985);
-  transition: transform 0.32s cubic-bezier(.2, .8, .25, 1);
+  transition: transform var(--dur-2) var(--ease-paper);
 }
 .overlay.is-open .film-player { transform: translateY(0) scale(1); }
 .film-topbar {
@@ -1626,7 +1642,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 1.01
   border: 1px solid rgba(255, 176, 0, 0.38);
   padding: 1rem;
   cursor: pointer;
-  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  transition: transform var(--dur-1) ease, border-color var(--dur-1) ease, background var(--dur-1) ease;
 }
 .tempad-destination:hover,
 .tempad-destination:focus-visible {
@@ -2119,7 +2135,7 @@ body.is-terminated .prune-thread::before {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   mix-blend-mode: multiply;
-  animation: variantStamp 0.38s cubic-bezier(.2, 1.35, .35, 1) both;
+  animation: variantStamp 0.38s var(--ease-snap) both;
 }
 @keyframes variantStamp {
   from { opacity: 0; transform: rotate(-10deg) scale(1.7); }
@@ -2171,7 +2187,7 @@ body.is-terminated .prune-thread::before {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 60ms ease;
+  transition: background-color var(--dur-1) ease, color var(--dur-1) ease, transform var(--dur-0) ease;
 }
 .variant-reset:hover { background: var(--ink); color: var(--card); }
 
@@ -2254,14 +2270,14 @@ body.is-terminated .prune-thread::before {
 }
 
 /* Physical press: button-like controls dip 1px in 60ms */
-.audit-btn { transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 60ms ease; }
-.film-control { transition: background-color 0.2s ease, color 0.2s ease, transform 60ms ease; }
-.overlay-close { transition: transform 60ms ease; }
+.audit-btn { transition: background-color var(--dur-1) ease, color var(--dur-1) ease, border-color var(--dur-1) ease, transform var(--dur-0) ease; }
+.film-control { transition: background-color var(--dur-1) ease, color var(--dur-1) ease, transform var(--dur-0) ease; }
+.overlay-close { transition: transform var(--dur-0) ease; }
 .audit-btn:active, .film-control:active, .overlay-close:active,
 .tempad-destination:active, .variant-reset:active {
   transform: translateY(1px);
 }
-.tempad-destination:active { transition-duration: 60ms; }
+.tempad-destination:active { transition-duration: var(--dur-0); }
 
 @media (prefers-reduced-motion: reduce) {
   .tempad-overlay .door-seam { animation: none !important; }
@@ -2443,7 +2459,7 @@ body.audit .odo-digit { color: #FFC95C; }
   background: var(--stamp-red);
   box-shadow: 0 0 0 .5px rgba(36, 26, 18, .25);
   transform: translateX(-1px);
-  transition: left 1.1s cubic-bezier(.2, .7, .2, 1);
+  transition: left 1.1s var(--ease-paper);
   pointer-events: none;
 }
 .meter-cal {
@@ -2832,3 +2848,190 @@ body:not(.audit) .signal {
 .btn--solid::before { left: .6rem; }
 .prune-btn { position: relative; padding-left: 1.75rem; }
 .prune-btn::before { left: .65rem; }
+
+/* ============================================================
+   V6.9 — MOTION SYSTEM
+   One named system over the folk one: tokens in :root, a boot
+   choreographed to a completion-time budget, a progress thread
+   with a node, file tabs with scrollspy, and micro-interactions
+   unified on the tokens. Everything here animates transform /
+   opacity only (the needle's calibrated `left` sweep in File 02
+   predates the rule and stays as a documented exception), and
+   every piece has a reduced-motion twin at the bottom.
+   ============================================================ */
+
+/* ---------- Boot: the strip clocks in, item by item ---------- */
+/* Backwards fill ONLY: the from-state covers each item's delay,
+   and the instant the animation ends the element returns to the
+   plain cascade — a forwards fill would freeze the end keyframe
+   over the strip buttons' press transforms forever. */
+html.js .strip > * { animation: stripIn var(--dur-2) var(--ease-paper) backwards; }
+html.js .strip > *:nth-child(2) { animation-delay: 60ms; }
+html.js .strip > *:nth-child(3) { animation-delay: 120ms; }
+html.js .strip > *:nth-child(4) { animation-delay: 180ms; }
+html.js .strip > *:nth-child(5) { animation-delay: 240ms; }
+html.js .strip > *:nth-child(6) { animation-delay: 300ms; }
+@keyframes stripIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Timeline progress: a thread, with its node ---------- */
+.timeline-progress {
+  --p: 0;
+  background: rgba(36, 26, 18, .08);
+}
+.timeline-progress span {
+  /* solid amber, no more teal gradient: it is the sacred thread */
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+}
+.timeline-progress::after {
+  /* the node rides the leading edge; positioned from the same --p
+     the JS writes each scroll frame, so it is never squashed by
+     the fill's scaleX the way a child of the fill would be */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--p) * 100%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px 2px rgba(255, 176, 0, .5);
+  pointer-events: none;
+}
+
+/* ---------- File tabs + scrollspy ---------- */
+/* The strip carries no section links (Audit/TemPad are actions,
+   and the strip already wraps tight on mobile), so wayfinding
+   lives in the case file's own header: a sticky index card that
+   rides along while the file scrolls, then lets go at the footer. */
+.file-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .15rem .35rem;
+  margin-bottom: clamp(1.4rem, 3.5vw, 2.2rem);
+  padding: .45rem .5rem;
+  background: var(--page-bg);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow-doc);
+  transition: opacity var(--dur-1) ease, visibility var(--dur-1);
+}
+/* the index is part of the file: when the prune takes the file,
+   the tabs are withdrawn too (pure CSS on the prune's own body
+   classes — the prune machine itself is untouched) */
+body.is-pruning .file-tabs,
+body.is-terminated .file-tabs {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.file-tab {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-soft);
+  padding: .45rem .7rem .55rem;
+  transition: color var(--dur-1) ease;
+}
+.file-tab::after {
+  /* the marker: an amber rule that draws in under the current file */
+  content: "";
+  position: absolute;
+  left: .7rem;
+  right: .7rem;
+  bottom: .28rem;
+  height: 3px;
+  background: var(--amber);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-1) var(--ease-paper);
+}
+.file-tab:hover { color: var(--ink); }
+.file-tab:hover::after { transform: scaleX(.45); background: var(--orange); }
+.file-tab.is-active { color: var(--ink); }
+.file-tab.is-active::after {
+  transform: scaleX(1);
+  background: var(--amber);
+  box-shadow: 0 0 6px rgba(255, 176, 0, .55);
+}
+/* anchor landings clear the sticky index */
+.file { scroll-margin-top: 4.2rem; }
+
+/* ---------- File 02: the signals file in, card by card ---------- */
+/* While the section is unrevealed the cards sit 10px low and clear;
+   when the reveal lands, app.js holds .is-cascading on the section
+   for a second so each card's transition is delayed in turn, then
+   removes it — hover timing is never taxed by the entrance. */
+html.js #file-02:not(.is-visible) .signal { opacity: 0; transform: translateY(10px); }
+#file-02.is-cascading .signal:nth-child(1) { transition-delay: 60ms; }
+#file-02.is-cascading .signal:nth-child(2) { transition-delay: 130ms; }
+#file-02.is-cascading .signal:nth-child(3) { transition-delay: 200ms; }
+#file-02.is-cascading .signal:nth-child(4) { transition-delay: 270ms; }
+#file-02.is-cascading .signal:nth-child(5) { transition-delay: 340ms; }
+
+/* ---------- Signal hover: lift, settle, light the hardware ---------- */
+/* A vertical raise with the hard shadow settling underneath (the
+   old diagonal slide read as the card slipping, not lifting). */
+.signal:hover,
+.signal:focus-within { transform: translateY(-2px); box-shadow: 2px 7px 0 rgba(36, 26, 18, .16); }
+.signal:active { transition-duration: var(--dur-0); }
+/* the channel tag carries the same lit notch as the v6.7 primary
+   controls; it lights when the card is engaged */
+.signal-tag { position: relative; padding-left: .7rem; }
+.signal-tag::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 62%;
+  border-radius: 1px;
+  background: var(--rule);
+  transform: translateY(-50%);
+  transition: background var(--dur-1) ease, box-shadow var(--dur-1) ease;
+}
+.signal:hover .signal-tag::before,
+.signal:focus-within .signal-tag::before {
+  background: var(--amber);
+  box-shadow: 0 0 7px rgba(255, 176, 0, .65);
+}
+/* the featured panel's brass screws catch the light (they are
+   background art on the pseudos, so brightness does the work) */
+.signal--featured::before,
+.signal--featured::after { transition: filter var(--dur-1) ease; }
+.signal--featured:hover::before,
+.signal--featured:hover::after,
+.signal--featured:focus-within::before,
+.signal--featured:focus-within::after { filter: brightness(1.35); }
+
+/* ---------- Prose links: the underline draws itself ---------- */
+.to-top {
+  text-decoration: none;
+  padding-bottom: 2px;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size var(--dur-2) var(--ease-paper);
+}
+.to-top:hover,
+.to-top:focus-visible { background-size: 100% 2px; }
+
+/* ---------- V6.9 reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  /* no strip entrance at all (not even the delay hold) */
+  html.js .strip > * { animation: none; }
+  /* the cascade never hides a card */
+  html.js #file-02:not(.is-visible) .signal { opacity: 1; transform: none; }
+  /* state changes still read, they just don't travel */
+  .file-tab::after, .to-top { transition: none; }
+}

@@ -17,7 +17,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400;0,600;0,800;0,900;1,600&family=IBM+Plex+Mono:wght@400;500;600&family=Special+Elite&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="./style.css">
-  <script>document.documentElement.className += ' js';</script>
+  <script>
+    document.documentElement.className += ' js';
+    /* Dead-man's switch for every JS-armed hidden state on the page
+       (reveals, boot fields, stamp): app.js raises __tvaAppReady as its
+       first act. If it never loads, disarm the gate after 3s so all
+       content falls back to its natural, visible state. */
+    window.__tvaBootWatchdog = setTimeout(function () {
+      if (!window.__tvaAppReady) document.documentElement.classList.remove('js');
+    }, 3000);
+  </script>
   <!-- File data -->
   <script type="application/ld+json">
   {
@@ -178,6 +187,16 @@
 
     <!-- ========== CASE FILE ========== -->
     <div class="case-file">
+
+      <!-- File index tabs: sticky wayfinding for the case file, with
+           scrollspy (app.js marks the current file aria-current). -->
+      <nav class="file-tabs" aria-label="Case file sections">
+        <a class="file-tab" href="#file-01" data-spy="file-01">File 01</a>
+        <a class="file-tab" href="#file-02" data-spy="file-02">File 02</a>
+        <a class="file-tab" href="#file-03" data-spy="file-03">File 03</a>
+        <a class="file-tab" href="#file-04" data-spy="file-04">File 04</a>
+        <a class="file-tab" href="#annex-intake" data-spy="annex-intake">Annex</a>
+      </nav>
 
       <!-- FILE 01 — KNOWN BEHAVIORS -->
       <section class="file reveal" id="file-01" aria-labelledby="file01Title">

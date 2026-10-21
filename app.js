@@ -2,6 +2,12 @@
 (function () {
   'use strict';
 
+  /* Boot watchdog disarm: the head script removes the `js` class after
+     3s if this flag never lands, so a failed script load can never
+     leave JS-armed hidden states (reveals, fields, stamp) stuck. */
+  window.__tvaAppReady = true;
+  if (window.__tvaBootWatchdog) clearTimeout(window.__tvaBootWatchdog);
+
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
@@ -27,6 +33,12 @@
           if (el.classList.contains('file')) {
             el.classList.add('is-opened');
             nudgeMain();
+          }
+          if (el.id === 'file-02') {
+            // the signal cards file in one by one (CSS holds their
+            // per-card delays only while this class is on)
+            el.classList.add('is-cascading');
+            setTimeout(() => el.classList.remove('is-cascading'), 1000);
           }
           io.unobserve(el);
           setTimeout(() => { el.style.transitionDelay = ''; }, 1100);
@@ -54,7 +66,7 @@
           cardScene.classList.add('is-jolt');
           setTimeout(() => cardScene.classList.remove('is-jolt'), 380);
         }
-      }, 450);
+      }, 780);
     }
   }
 
@@ -69,8 +81,8 @@
         const r = idCard.getBoundingClientRect();
         const px = (e.clientX - r.left) / r.width - 0.5;
         const py = (e.clientY - r.top) / r.height - 0.5;
-        idCard.style.setProperty('--ry', (px * 5).toFixed(2) + 'deg');
-        idCard.style.setProperty('--rx', (-py * 5).toFixed(2) + 'deg');
+        idCard.style.setProperty('--ry', (px * 2.5).toFixed(2) + 'deg');
+        idCard.style.setProperty('--rx', (-py * 2.5).toFixed(2) + 'deg');
         idCard.style.setProperty('--mx', ((px + 0.5) * 100).toFixed(1) + '%');
         idCard.style.setProperty('--my', ((py + 0.5) * 100).toFixed(1) + '%');
         rafPending = false;
@@ -425,12 +437,42 @@
       const max = document.documentElement.scrollHeight - innerHeight;
       const p = max > 0 ? Math.min(1, scrollY / max) : 0;
       timelineBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      // the node at the thread's leading edge rides the same value
+      timelineBar.parentElement.style.setProperty('--p', p.toFixed(4));
       ticking = false;
     };
     addEventListener('scroll', () => {
       if (!ticking) { ticking = true; requestAnimationFrame(updateBar); }
     }, { passive: true });
     updateBar();
+  }
+
+  /* ---------- Scrollspy: mark the file currently on the reader's desk ---------- */
+  const spyTabs = document.querySelectorAll('.file-tab[data-spy]');
+  if (spyTabs.length && 'IntersectionObserver' in window) {
+    const spyById = {};
+    spyTabs.forEach((tab) => { spyById[tab.getAttribute('data-spy')] = tab; });
+    let spyCurrent = null;
+    const spySet = (id) => {
+      if (id === spyCurrent) return;
+      spyCurrent = id;
+      spyTabs.forEach((tab) => {
+        const on = tab.getAttribute('data-spy') === id;
+        tab.classList.toggle('is-active', on);
+        if (on) tab.setAttribute('aria-current', 'true');
+        else tab.removeAttribute('aria-current');
+      });
+    };
+    // a section counts as current while it crosses the desk's middle band
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) spySet(entry.target.id);
+      });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    Object.keys(spyById).forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) spy.observe(section);
+    });
   }
 
   /* ---------- Temporal coordinates (pointer) ---------- */
