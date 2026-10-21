@@ -661,16 +661,32 @@
     });
   }
 
-  /* ---------- Prune Variant (absolutely do not press) ---------- */
+  /* ---------- Prune Variant (absolutely do not press) ----------
+     Choreographed erosion: the reset charge arms, the page burns away
+     bottom-to-top behind a rising erosion front, one loom thread holds
+     in the void, the verdict stamps land, and the Authority restores
+     the branch top-down. Every step runs on tracked timers; Escape or a
+     click (after a 1s grace) aborts, and a failsafe guarantees the page
+     can never be left pruned. */
   const pruneBtn = document.getElementById('pruneBtn');
   const pruneVeil = document.getElementById('pruneVeil');
-  const pruneCountdown = document.getElementById('pruneCountdown');
-  const pruneCountNumber = document.getElementById('pruneCountNumber');
-  const mainEl = document.querySelector('main');
+  const pruneHud = document.getElementById('pruneHud');
+  const pruneHudLabel = document.getElementById('pruneHudLabel');
+  const pruneHudCount = document.getElementById('pruneHudCount');
+  const pruneHudBarFill = document.getElementById('pruneHudBarFill');
+  const pruneFront = document.getElementById('pruneFront');
+  const pruneThread = document.getElementById('pruneThread');
+  const pruneStampRed = document.getElementById('pruneStampRed');
+  const pruneStampAmber = document.getElementById('pruneStampAmber');
   let pruning = false;
   let pruneAbortReadyAt = 0;
   let pruneTimers = [];
   let pruneVeilTimer = null;
+
+  // Reduced motion compresses the sequence (~60%) and drops the glitch.
+  const PRUNE_T = prefersReducedMotion
+    ? { arm: 300, step: 90, glitch: 0, count: 330, voidAt: 1400, restoreAt: 1800, restoreSpan: 600, failsafe: 4200 }
+    : { arm: 500, step: 150, glitch: 130, count: 550, voidAt: 2300, restoreAt: 2950, restoreSpan: 850, failsafe: 5500 };
 
   function pruneLater(fn, delay) {
     const id = setTimeout(fn, delay);
@@ -683,27 +699,119 @@
     pruneTimers = [];
   }
 
-  function setPruneCount(value) {
-    if (pruneCountNumber) pruneCountNumber.textContent = String(value);
+  // Erosion order: the ground goes first, the control room (strip) last.
+  function pruneTargets() {
+    const list = [];
+    const push = (el) => { if (el) list.push(el); };
+    push(document.querySelector('.colophon'));
+    push(document.getElementById('annex-intake'));
+    push(document.getElementById('file-04'));
+    push(document.getElementById('file-03'));
+    push(document.getElementById('file-02'));
+    push(document.getElementById('file-01'));
+    push(document.querySelector('.tva-marquee'));
+    push(document.querySelector('.card-zone'));
+    push(document.querySelector('.loom-tape'));
+    push(document.querySelector('.strip'));
+    return list;
   }
 
+  function setPruneHud(label, count) {
+    if (pruneHudLabel && label !== null) pruneHudLabel.textContent = label;
+    if (pruneHudCount && count !== null) pruneHudCount.textContent = count;
+  }
+
+  // Two low klaxon tones through the same WebAudio context as the seal.
+  function pruneKlaxon() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = audioCtx.currentTime;
+      [392, 311].forEach((f, i) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'triangle';
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + i * 0.17);
+        g.gain.exponentialRampToValueAtTime(0.035, t0 + i * 0.17 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.17 + 0.2);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t0 + i * 0.17);
+        o.stop(t0 + i * 0.17 + 0.22);
+      });
+    } catch (e) { /* silence is also very TVA */ }
+  }
+
+  function clearPruneStageFx() {
+    document.body.classList.remove('is-pruning');
+    if (pruneHud) pruneHud.classList.remove('is-visible');
+    if (pruneHudBarFill) pruneHudBarFill.classList.remove('is-draining');
+    if (pruneFront) pruneFront.classList.remove('is-sweeping');
+    if (pruneThread) pruneThread.classList.remove('is-visible', 'is-flaring');
+    if (pruneStampRed) pruneStampRed.classList.remove('is-slammed', 'is-down', 'is-faded');
+    if (pruneStampAmber) pruneStampAmber.classList.remove('is-slammed');
+  }
+
+  function flashVeilRestored() {
+    if (!pruneVeil) return;
+    pruneVeil.classList.remove('is-active');
+    pruneVeil.classList.add('is-restored');
+    clearTimeout(pruneVeilTimer);
+    pruneVeilTimer = setTimeout(() => pruneVeil.classList.remove('is-restored'), 900);
+  }
+
+  // Natural completion: the choreographed restore has already run.
+  function finishPrune() {
+    if (!pruning) return;
+    pruning = false;
+    clearPruneTimers();
+    clearPruneStageFx();
+    pruneTargets().forEach((el) => el.classList.remove('eroding', 'erode-glitch'));
+    setTimeout(() => {
+      pruneTargets().forEach((el) => el.classList.remove('is-refeeding'));
+    }, 800);
+    if (pruneVeil) pruneVeil.classList.remove('is-active');
+    if (pruneBtn) pruneBtn.disabled = false;
+    showToast('Timeline restored.');
+  }
+
+  // Abort path: snap everything back, no questions asked.
   function restorePrune(showNotice) {
     if (!pruning) return;
     pruning = false;
     clearPruneTimers();
-    document.body.classList.remove('is-pruning');
-    if (mainEl) mainEl.classList.remove('pruning');
-    if (pruneCountdown) pruneCountdown.classList.remove('is-visible');
+    const targets = pruneTargets();
+    targets.forEach((el) => el.classList.add('is-refeeding'));
+    void document.body.offsetWidth; // let the refeed transition take hold
+    targets.forEach((el) => el.classList.remove('eroding', 'erode-glitch'));
+    setTimeout(() => targets.forEach((el) => el.classList.remove('is-refeeding')), 750);
+    clearPruneStageFx();
+    flashVeilRestored();
     if (pruneBtn) pruneBtn.disabled = false;
-    if (pruneVeil) {
-      pruneVeil.classList.remove('is-active');
-      pruneVeil.classList.add('is-restored');
-      clearTimeout(pruneVeilTimer);
-      pruneVeilTimer = setTimeout(() => pruneVeil.classList.remove('is-restored'), 650);
+    if (showNotice) showToast('Timeline restored.');
+  }
+
+  function restoreSequence() {
+    if (!pruning) return;
+    document.body.classList.remove('is-pruning');
+    if (pruneThread) pruneThread.classList.add('is-flaring');
+    if (pruneStampRed) {
+      pruneStampRed.classList.remove('is-slammed');
+      pruneStampRed.classList.add('is-down', 'is-faded');
     }
-    if (showNotice) {
-      showToast('Timeline restored.');
-    }
+    if (pruneStampAmber) pruneStampAmber.classList.add('is-slammed');
+    setPruneHud('Timeline restored — by order of the Authority', '');
+    flashVeilRestored();
+    // Regions feed back in top-down: control room first, ground last.
+    pruneTargets().slice().reverse().forEach((el, i) => {
+      pruneLater(() => {
+        el.classList.add('is-refeeding');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.classList.remove('eroding');
+        }));
+        pruneLater(() => el.classList.remove('is-refeeding'), 750);
+      }, i * 70);
+    });
+    pruneLater(finishPrune, PRUNE_T.restoreSpan);
   }
 
   function startPrune() {
@@ -716,14 +824,46 @@
       pruneVeil.classList.add('is-active');
     }
     document.body.classList.add('is-pruning');
-    if (mainEl) mainEl.classList.add('pruning');
-    if (pruneCountdown) pruneCountdown.classList.add('is-visible');
-    setPruneCount(3);
-    pruneLater(() => setPruneCount(2), 900);
-    pruneLater(() => setPruneCount(1), 1800);
-    pruneLater(() => setPruneCount(0), 2700);
-    pruneLater(() => restorePrune(true), 3800);
-    pruneLater(() => restorePrune(false), 5000);
+    pruneKlaxon();
+
+    // Phase 1 — ARM: HUD chip up, charge bar draining.
+    if (pruneHud) pruneHud.classList.add('is-visible');
+    setPruneHud('Reset charge armed — Branch E-1130', 'Pruning in 3');
+    if (pruneHudBarFill) {
+      pruneHudBarFill.classList.remove('is-draining');
+      void pruneHudBarFill.offsetWidth;
+      // the drain runs from the first erosion tick to the void moment
+      pruneLater(() => pruneHudBarFill.classList.add('is-draining'), PRUNE_T.arm);
+    }
+    pruneLater(() => setPruneHud(null, 'Pruning in 2'), PRUNE_T.count);
+    pruneLater(() => setPruneHud(null, 'Pruning in 1'), PRUNE_T.count * 2);
+
+    // Phase 2 — EROSION: front sweeps up, regions glitch then burn away.
+    pruneLater(() => { if (pruneFront) pruneFront.classList.add('is-sweeping'); }, PRUNE_T.arm);
+    pruneTargets().forEach((el, i) => {
+      pruneLater(() => {
+        if (prefersReducedMotion) {
+          el.classList.add('eroding');
+          return;
+        }
+        el.classList.add('erode-glitch');
+        pruneLater(() => {
+          el.classList.remove('erode-glitch');
+          el.classList.add('eroding');
+        }, PRUNE_T.glitch);
+      }, PRUNE_T.arm + i * PRUNE_T.step);
+    });
+
+    // Phase 3 — VOID: one thread holds; the verdict lands.
+    pruneLater(() => {
+      if (pruneThread) pruneThread.classList.add('is-visible');
+      if (pruneStampRed) pruneStampRed.classList.add('is-slammed');
+      setPruneHud('Branch E-1130 · Terminated', '');
+    }, PRUNE_T.voidAt);
+
+    // Phase 4 — RESTORE (choreographed), plus the unconditional failsafe.
+    pruneLater(restoreSequence, PRUNE_T.restoreAt);
+    pruneLater(() => restorePrune(false), PRUNE_T.failsafe);
   }
 
   if (pruneBtn) pruneBtn.addEventListener('click', startPrune);

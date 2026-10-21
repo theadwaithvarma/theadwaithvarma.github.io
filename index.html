@@ -505,9 +505,18 @@
 
   <div id="pruneVeil" aria-hidden="true"></div>
   <div class="crt-flash" id="crtFlash" aria-hidden="true"></div>
-  <div class="prune-countdown" id="pruneCountdown" aria-hidden="true">
-    <small>Pruning in</small>
-    <span id="pruneCountNumber">3</span>
+
+  <!-- Prune sequence stage: HUD, erosion front, loom thread, verdict stamps -->
+  <div class="prune-stage" aria-hidden="true">
+    <div class="prune-hud" id="pruneHud">
+      <span class="prune-hud-label" id="pruneHudLabel">Reset charge armed — Branch E-1130</span>
+      <span class="prune-hud-count" id="pruneHudCount">Pruning in 3</span>
+      <span class="prune-hud-bar"><span id="pruneHudBarFill"></span></span>
+    </div>
+    <div class="prune-thread" id="pruneThread"></div>
+    <div class="prune-front" id="pruneFront"></div>
+    <div class="prune-stamp prune-stamp--red" id="pruneStampRed">Branch Terminated</div>
+    <div class="prune-stamp prune-stamp--amber" id="pruneStampAmber">Restored</div>
   </div>
 
   <!-- ========== FOOTER ========== -->
@@ -515,6 +524,7 @@
     <span class="date-stamp" aria-hidden="true">Filed · BLR</span>
     <p>© 2026 Time Variance Authority, Bengaluru Branch (unofficial, obviously).</p>
     <p>This variant’s timeline remains unpruned.</p>
+    <p class="colophon-sign">— End of file · Processed by the Bengaluru Branch Office —</p>
     <p><a class="to-top" href="#idCard">Return to the card ↑</a></p>
   </footer>
 
