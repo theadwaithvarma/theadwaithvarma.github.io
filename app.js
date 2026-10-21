@@ -1,101 +1,58 @@
-/* TVA Personnel File — Variant E-1130. Vanilla JS, no dependencies. */
+/* TVA Incursion Console — Variant E-1130. Vanilla JS, no dependencies. */
 (function () {
   'use strict';
 
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  /* ---------- Scroll reveals ---------- */
+  /* ---------- Scroll reveals + Yggdrasil branch lighting ---------- */
   const revealEls = document.querySelectorAll('.reveal');
+  const branchGroups = (name) => document.querySelectorAll('.ygg-branch[data-branch="' + name + '"]');
+
   if ('IntersectionObserver' in window && !prefersReducedMotion) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          if (entry.target.classList.contains('file')) entry.target.classList.add('is-opened');
           io.unobserve(entry.target);
         }
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach((el) => io.observe(el));
+
+    const branchIO = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          branchGroups(entry.target.getAttribute('data-branch')).forEach((b) => b.classList.add('lit'));
+          branchIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('section[data-branch]').forEach((s) => branchIO.observe(s));
   } else {
     revealEls.forEach((el) => el.classList.add('is-visible'));
+    document.querySelectorAll('.ygg-branch').forEach((b) => b.classList.add('lit'));
   }
 
-  /* ---------- The stamp ---------- */
-  const stamp = document.getElementById('stamp');
-  const cardScene = document.getElementById('cardScene');
-  if (stamp) {
-    if (prefersReducedMotion) {
-      stamp.classList.add('is-stamped');
-      stamp.style.animation = 'none';
-      stamp.style.opacity = '.94';
-      stamp.style.transform = 'rotate(-12deg) scale(1)';
-    } else {
-      setTimeout(() => {
-        stamp.classList.add('is-stamped');
-        if (cardScene) {
-          cardScene.classList.add('is-jolt');
-          setTimeout(() => cardScene.classList.remove('is-jolt'), 380);
-        }
-      }, 450);
-    }
-  }
+  /* ---------- Clocks, Doomsday countdown, incursion proximity ---------- */
+  const DOOMSDAY = new Date('2026-12-18T00:00:00+05:30').getTime();
+  const WINDOW_START = new Date('2026-10-22T00:00:00+05:30').getTime();
 
-  /* ---------- Card tilt ---------- */
-  const idCard = document.getElementById('idCard');
-  if (idCard && cardScene && canHover && !prefersReducedMotion) {
-    let rafPending = false;
-    cardScene.addEventListener('pointermove', (e) => {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        const r = idCard.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width - 0.5;
-        const py = (e.clientY - r.top) / r.height - 0.5;
-        idCard.style.setProperty('--ry', (px * 5).toFixed(2) + 'deg');
-        idCard.style.setProperty('--rx', (-py * 5).toFixed(2) + 'deg');
-        rafPending = false;
-      });
-    });
-    cardScene.addEventListener('pointerleave', () => {
-      idCard.style.setProperty('--rx', '0deg');
-      idCard.style.setProperty('--ry', '0deg');
-    });
-  }
-
-  /* ---------- Redactions (tap toggles; hover/focus handled in CSS) ---------- */
-  document.querySelectorAll('.redact').forEach((el) => {
-    el.addEventListener('click', () => {
-      el.classList.toggle('is-revealed');
-    });
-  });
-
-  /* ---------- Temporal chronometer + file date (IST) ---------- */
   const chronoClock = document.getElementById('chronoClock');
+  const doomCountdown = document.getElementById('doomCountdown');
   const istClock = document.getElementById('istClock');
   const noteDate = document.getElementById('noteDate');
-  const liveStatus = document.getElementById('liveStatus');
-  let lastStatusHour = -1;
+  const proximityPct = document.getElementById('proximityPct');
+  const proximityFill = document.getElementById('proximityFill');
+  const daysToDoom = document.getElementById('daysToDoom');
+
+  const pad2 = (n) => String(n).padStart(2, '0');
 
   function tickClock() {
     try {
       const now = new Date();
-      // The seal's hourglass turns with the seconds, like a chronometer dial
-      document.documentElement.style.setProperty('--seal-rot', (now.getSeconds() * 6) + 'deg');
-      // Live status line on the card, keyed to the actual IST hour
-      if (liveStatus) {
-        const istHour = parseInt(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false }), 10) % 24;
-        if (istHour !== lastStatusHour) {
-          lastStatusHour = istHour;
-          liveStatus.textContent =
-            istHour < 5 ? 'At this hour: awake past branch hours, watching for launches' :
-            istHour < 9 ? 'At this hour: already ahead of today\u2019s launches' :
-            istHour < 17 ? 'At this hour: on timeline, monitoring signals' :
-            istHour < 21 ? 'At this hour: reviewing the day\u2019s transmissions' :
-            'At this hour: settling in for the night watch';
-        }
-      }
+      const nowMs = now.getTime();
+
       if (chronoClock) {
         chronoClock.textContent = now.toLocaleTimeString('en-IN', {
           timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
@@ -113,12 +70,35 @@
           timeZone: 'Asia/Kolkata', day: '2-digit', month: 'long', year: 'numeric'
         });
       }
+
+      // Countdown to Doomsday (18 Dec 2026, 00:00 IST)
+      const remaining = DOOMSDAY - nowMs;
+      if (doomCountdown) {
+        if (remaining <= 0) {
+          doomCountdown.textContent = 'EVENT REACHED';
+        } else {
+          const d = Math.floor(remaining / 86400000);
+          const h = Math.floor((remaining % 86400000) / 3600000);
+          const m = Math.floor((remaining % 3600000) / 60000);
+          const s = Math.floor((remaining % 60000) / 1000);
+          doomCountdown.textContent = pad2(d) + 'D : ' + pad2(h) + 'H : ' + pad2(m) + 'M : ' + pad2(s) + 'S';
+        }
+      }
+      if (daysToDoom) {
+        const days = Math.max(0, Math.ceil(remaining / 86400000));
+        daysToDoom.textContent = remaining <= 0
+          ? 'Doomsday is here'
+          : days + (days === 1 ? ' day to Doomsday' : ' days to Doomsday');
+      }
+
+      // Proximity = elapsed share of the monitoring window, from the same clock
+      const share = Math.min(1, Math.max(0, (nowMs - WINDOW_START) / (DOOMSDAY - WINDOW_START)));
+      if (proximityPct) proximityPct.textContent = (share * 100).toFixed(1) + '%';
+      if (proximityFill) proximityFill.style.width = (share * 100).toFixed(2) + '%';
     } catch (e) { /* leave the printed defaults */ }
   }
-  if (chronoClock || istClock || noteDate) {
-    tickClock();
-    setInterval(tickClock, 1000);
-  }
+  tickClock();
+  setInterval(tickClock, 1000);
 
   /* ---------- Toast ---------- */
   const toast = document.getElementById('toast');
@@ -154,37 +134,52 @@
     });
   }
 
-  /* ---------- Live signal strengths (best effort; printed figures are the fallback) ---------- */
+  /* ---------- ID card tilt ---------- */
+  const idCard = document.getElementById('idCard');
+  const cardScene = document.getElementById('cardScene');
+  if (idCard && cardScene && canHover && !prefersReducedMotion) {
+    let rafPending = false;
+    cardScene.addEventListener('pointermove', (e) => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        const r = idCard.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        idCard.style.setProperty('--ry', (px * 4).toFixed(2) + 'deg');
+        idCard.style.setProperty('--rx', (-py * 4).toFixed(2) + 'deg');
+        rafPending = false;
+      });
+    });
+    cardScene.addEventListener('pointerleave', () => {
+      idCard.style.setProperty('--rx', '0deg');
+      idCard.style.setProperty('--ry', '0deg');
+    });
+  }
+
+  /* ---------- Live beacon strengths (printed figures are the verified fallback) ---------- */
   const liveState = {};
   document.querySelectorAll('[data-live]').forEach((el) => {
     const v = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
     if (Number.isFinite(v)) liveState[el.getAttribute('data-live')] = v;
   });
 
-  // Inject a strength meter into each signal card + a grand-total readout
   const meterFills = {};
   document.querySelectorAll('[data-live]').forEach((el) => {
     const key = el.getAttribute('data-live');
-    const dataP = el.closest('.signal-data');
-    if (!dataP || meterFills[key]) return;
+    const host = el.closest('.beacon-data');
+    if (!host || meterFills[key]) return;
     const meter = document.createElement('span');
-    meter.className = 'signal-meter';
+    meter.className = 'beacon-meter';
     meter.setAttribute('aria-hidden', 'true');
     const fill = document.createElement('span');
-    fill.className = 'signal-fill';
+    fill.className = 'beacon-fill';
     meter.appendChild(fill);
-    dataP.appendChild(meter);
+    host.appendChild(meter);
     meterFills[key] = fill;
   });
-  let signalTotalEl = null;
-  const signalsList = document.querySelector('.signals');
-  if (signalsList) {
-    const total = document.createElement('p');
-    total.className = 'signal-total';
-    total.innerHTML = 'Total recorded across all timelines: <b id="signalTotal">—</b>';
-    signalsList.after(total);
-    signalTotalEl = total.querySelector('#signalTotal');
-  }
+
+  const signalTotalEl = document.getElementById('signalTotal');
 
   function refreshMeters(changedKey) {
     const max = Math.max(1, ...Object.values(liveState));
@@ -199,7 +194,7 @@
     }
     if (changedKey) {
       const el = document.querySelector('[data-live="' + changedKey + '"]');
-      const card = el && el.closest('.signal');
+      const card = el && el.closest('.beacon');
       if (card) {
         card.classList.remove('is-updated');
         void card.offsetWidth;
@@ -289,14 +284,14 @@
     } catch (e) { /* keep the printed figure */ }
   })();
 
-  /* ---------- Timeline traversal progress ---------- */
-  const timelineBar = document.getElementById('timelineBar');
-  if (timelineBar) {
+  /* ---------- Seam scroll progress ---------- */
+  const seamBar = document.getElementById('seamBar');
+  if (seamBar) {
     let ticking = false;
     const updateBar = () => {
       const max = document.documentElement.scrollHeight - innerHeight;
       const p = max > 0 ? Math.min(1, scrollY / max) : 0;
-      timelineBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      seamBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
       ticking = false;
     };
     addEventListener('scroll', () => {
@@ -305,134 +300,173 @@
     updateBar();
   }
 
-  /* ---------- Temporal coordinates (pointer) ---------- */
-  const tCoords = document.getElementById('tCoords');
-  if (tCoords && canHover) {
-    let coordPending = false;
-    addEventListener('pointermove', (e) => {
-      if (coordPending) return;
-      coordPending = true;
-      requestAnimationFrame(() => {
-        const x = String(Math.round((e.clientX / innerWidth) * 999)).padStart(3, '0');
-        const y = String(Math.round((e.clientY / innerHeight) * 999)).padStart(3, '0');
-        tCoords.textContent = 'X ' + x + ' · Y ' + y;
-        coordPending = false;
-      });
-    }, { passive: true });
-  }
-
-  /* ---------- Temporal audit mode ---------- */
-  const auditBtn = document.getElementById('auditBtn');
-  if (auditBtn) {
-    auditBtn.addEventListener('click', () => {
-      const on = document.body.classList.toggle('audit');
-      auditBtn.setAttribute('aria-pressed', String(on));
-      auditBtn.textContent = on ? 'End Audit' : 'Run Temporal Audit';
-      showToast(on ? 'Temporal audit running — timeline holding.' : 'Audit closed. As you were.');
-    });
-  }
-
-  /* ---------- Timeline field (canvas behind the ID card) ---------- */
-  const canvas = document.getElementById('timelineCanvas');
-  const cardZone = document.querySelector('.card-zone');
-  if (canvas && cardZone) {
+  /* ---------- Incursion canvas: two worlds, one seam ---------- */
+  const canvas = document.getElementById('incursionCanvas');
+  const viewport = document.querySelector('.viewport');
+  if (canvas && viewport) {
     const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, threads = [], running = false, rafId = null;
+    let W = 0, H = 0, running = false, rafId = null;
+    let stars = [], sparks = [], gradA = null, gradB = null;
     const pointer = { x: -9999, y: -9999 };
+    const par = { x: 0, y: 0, tx: 0, ty: 0 };
 
-    function buildField() {
-      const r = cardZone.getBoundingClientRect();
+    function buildScene() {
+      const r = viewport.getBoundingClientRect();
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      W = Math.max(300, r.width); H = Math.max(300, r.height);
-      canvas.width = W * dpr; canvas.height = H * dpr;
+      W = Math.max(320, r.width);
+      H = Math.max(320, r.height);
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      threads = [];
-      const count = 6;
-      for (let i = 0; i < count; i++) {
-        const baseY = (H / (count + 1)) * (i + 1);
-        const nodes = [];
-        const nodeCount = 3 + (i % 3);
-        for (let j = 0; j < nodeCount; j++) {
-          nodes.push({ fx: (j + 0.5 + (i % 2) * 0.22) / nodeCount, phase: Math.random() * Math.PI * 2, r: 2 + Math.random() * 2.2 });
-        }
-        threads.push({
-          baseY, amp: 14 + Math.random() * 26, speed: 0.12 + Math.random() * 0.2,
-          phase: Math.random() * Math.PI * 2,
-          color: i % 3 === 2 ? '20,69,61' : '217,93,30',
-          nodes
-        });
+
+      stars = [];
+      const starCount = Math.min(170, Math.floor(W * H / 11000));
+      for (let i = 0; i < starCount; i++) {
+        stars.push({ x: Math.random(), y: Math.random(), r: 0.4 + Math.random() * 1.1, ph: Math.random() * Math.PI * 2 });
       }
+      sparks = [];
+      const sparkCount = Math.min(110, Math.floor(W / 11));
+      for (let i = 0; i < sparkCount; i++) sparks.push(newSpark(true));
+
+      // Cached planet-shading gradients (rebuilt on resize only)
+      const seamY = H * 0.55;
+      const RA = Math.max(W, H) * 0.72;
+      const RB = Math.max(W, H) * 0.66;
+      gradA = ctx.createRadialGradient(W * 0.14, seamY - RA, RA * 0.82, W * 0.14, seamY - RA, RA);
+      gradA.addColorStop(0, 'rgba(53,161,132,0)');
+      gradA.addColorStop(0.86, 'rgba(53,161,132,0.05)');
+      gradA.addColorStop(1, 'rgba(45,212,191,0.20)');
+      gradB = ctx.createRadialGradient(W * 0.86, seamY + RB, RB * 0.82, W * 0.86, seamY + RB, RB);
+      gradB.addColorStop(0, 'rgba(255,107,26,0)');
+      gradB.addColorStop(0.86, 'rgba(255,107,26,0.05)');
+      gradB.addColorStop(1, 'rgba(255,107,26,0.22)');
     }
 
-    function drawField(t) {
-      ctx.clearRect(0, 0, W, H);
+    function newSpark(anywhere) {
+      return {
+        x: Math.random(),
+        yOff: anywhere ? Math.random() * 130 : Math.random() * 10,
+        vy: 0.25 + Math.random() * 0.55,
+        vx: (Math.random() - 0.5) * 0.12,
+        size: 0.7 + Math.random() * 1.7,
+        life: 0.5 + Math.random() * 0.5
+      };
+    }
+
+    function drawScene(t) {
       const time = t * 0.001;
-      threads.forEach((th) => {
+      const seamY = H * 0.55;
+      const gap = 30 + Math.sin(time * 0.45) * 9;        // the worlds breathe
+      const dipA = Math.sin(time * 0.3) * 4;
+      const dipB = Math.cos(time * 0.26) * 4;
+      par.x += (par.tx - par.x) * 0.045;
+      par.y += (par.ty - par.y) * 0.045;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Starfield dust
+      stars.forEach((s) => {
+        const a = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(time * 0.7 + s.ph));
         ctx.beginPath();
-        for (let x = 0; x <= W; x += 14) {
-          const y = th.baseY + Math.sin(x * 0.006 + th.phase + time * th.speed) * th.amp
-            + Math.sin(x * 0.017 + th.phase * 2) * th.amp * 0.3;
-          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = 'rgba(' + th.color + ',0.28)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        th.nodes.forEach((nd) => {
-          const x = nd.fx * W;
-          const y = th.baseY + Math.sin(x * 0.006 + th.phase + time * th.speed) * th.amp
-            + Math.sin(x * 0.017 + th.phase * 2) * th.amp * 0.3
-            + Math.sin(time * 0.9 + nd.phase) * 3;
-          const dx = x - pointer.x, dy = y - pointer.y;
-          const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 170);
-          ctx.beginPath();
-          ctx.arc(x, y, nd.r + near * 2.6, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(' + th.color + ',' + (0.35 + near * 0.55) + ')';
-          ctx.fill();
-          if (near > 0.25) {
-            ctx.beginPath();
-            ctx.arc(x, y, nd.r + 6 + near * 8, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(' + th.color + ',' + (near * 0.5) + ')';
-            ctx.stroke();
-          }
-        });
+        ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(237,232,218,' + a.toFixed(3) + ')';
+        ctx.fill();
+      });
+
+      const RA = Math.max(W, H) * 0.72;
+      const RB = Math.max(W, H) * 0.66;
+      const cAx = W * 0.14 + par.x, cAy = seamY - gap / 2 - RA + dipA + par.y;
+      const cBx = W * 0.86 - par.x, cBy = seamY + gap / 2 + RB + dipB - par.y;
+
+      // World A (teal, descending) + World B (molten, ascending)
+      ctx.beginPath(); ctx.arc(cAx, cAy, RA, 0, Math.PI * 2); ctx.fillStyle = gradA; ctx.fill();
+      ctx.beginPath(); ctx.arc(cAx, cAy, RA, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(45,212,191,0.55)'; ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cAx, cAy, RA, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(45,212,191,0.12)'; ctx.lineWidth = 9; ctx.stroke();
+
+      ctx.beginPath(); ctx.arc(cBx, cBy, RB, 0, Math.PI * 2); ctx.fillStyle = gradB; ctx.fill();
+      ctx.beginPath(); ctx.arc(cBx, cBy, RB, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,107,26,0.6)'; ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cBx, cBy, RB, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,107,26,0.13)'; ctx.lineWidth = 9; ctx.stroke();
+
+      // The seam — where the worlds nearly touch
+      const seamPulse = 0.72 + 0.28 * Math.sin(time * 1.4);
+      const seamGrad = ctx.createLinearGradient(0, seamY - 30, 0, seamY + 30);
+      seamGrad.addColorStop(0, 'rgba(255,140,60,0)');
+      seamGrad.addColorStop(0.5, 'rgba(255,140,60,' + (0.20 * seamPulse).toFixed(3) + ')');
+      seamGrad.addColorStop(1, 'rgba(255,140,60,0)');
+      ctx.fillStyle = seamGrad;
+      ctx.fillRect(0, seamY - 30, W, 60);
+      const coreGrad = ctx.createLinearGradient(0, 0, W, 0);
+      coreGrad.addColorStop(0, 'rgba(255,170,90,0)');
+      coreGrad.addColorStop(0.5, 'rgba(255,190,120,' + (0.85 * seamPulse).toFixed(3) + ')');
+      coreGrad.addColorStop(1, 'rgba(255,170,90,0)');
+      ctx.fillStyle = coreGrad;
+      ctx.fillRect(0, seamY - 0.75, W, 1.5);
+
+      // Sparks rising off the seam
+      sparks.forEach((sp, i) => {
+        sp.yOff += sp.vy;
+        sp.x += sp.vx / Math.max(1, W) * 60;
+        if (sp.yOff > 150 || sp.x < -0.02 || sp.x > 1.02) sparks[i] = newSpark(false);
+        const x = sp.x * W;
+        const y = seamY - sp.yOff;
+        const fade = Math.max(0, 1 - sp.yOff / 150) * sp.life;
+        const dx = x - pointer.x, dy = y - pointer.y;
+        const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 130);
+        const a = Math.min(1, fade * (0.55 + near * 0.7));
+        ctx.beginPath();
+        ctx.arc(x, y, sp.size + near * 1.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,' + Math.round(150 + near * 60) + ',70,' + a.toFixed(3) + ')';
+        ctx.fill();
       });
     }
 
     function loop(t) {
       if (!running) return;
-      drawField(t || 0);
+      drawScene(t || 0);
       rafId = requestAnimationFrame(loop);
     }
-
-    function startField() {
+    function startScene() {
       if (running) return;
-      if (prefersReducedMotion) { drawField(1200); return; }
+      if (prefersReducedMotion) { drawScene(1400); return; }
       running = true;
       rafId = requestAnimationFrame(loop);
     }
-    function stopField() {
+    function stopScene() {
       running = false;
       if (rafId) cancelAnimationFrame(rafId);
     }
 
-    buildField();
-    drawField(0);
+    buildScene();
+    drawScene(0);
     if ('IntersectionObserver' in window) {
       new IntersectionObserver((entries) => {
-        entries.forEach((en) => { if (en.isIntersecting && !document.hidden) startField(); else stopField(); });
-      }, { threshold: 0.02 }).observe(cardZone);
-    } else { startField(); }
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stopField(); else startField(); });
-    cardZone.addEventListener('pointermove', (e) => {
-      const r = canvas.getBoundingClientRect();
-      pointer.x = e.clientX - r.left;
-      pointer.y = e.clientY - r.top;
-    });
-    cardZone.addEventListener('pointerleave', () => { pointer.x = -9999; pointer.y = -9999; });
+        entries.forEach((en) => { if (en.isIntersecting && !document.hidden) startScene(); else stopScene(); });
+      }, { threshold: 0.02 }).observe(viewport);
+    } else { startScene(); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopScene(); else startScene(); });
+
+    if (canHover && !prefersReducedMotion) {
+      viewport.addEventListener('pointermove', (e) => {
+        const r = canvas.getBoundingClientRect();
+        pointer.x = e.clientX - r.left;
+        pointer.y = e.clientY - r.top;
+        par.tx = ((e.clientX / innerWidth) - 0.5) * -11;
+        par.ty = ((e.clientY / innerHeight) - 0.5) * -8;
+      });
+      viewport.addEventListener('pointerleave', () => {
+        pointer.x = -9999; pointer.y = -9999;
+        par.tx = 0; par.ty = 0;
+      });
+    }
+
     let resizeTimer = null;
     addEventListener('resize', () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { buildField(); if (!running) drawField(0); }, 180);
+      resizeTimer = setTimeout(() => { buildScene(); if (!running) drawScene(0); }, 180);
     });
   }
 
