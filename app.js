@@ -333,38 +333,79 @@
     } catch (e) { /* silence is also very TVA */ }
   }
 
-  function summonMiss(scare, withSound) {
+  let missScareTimer = null;
+  let missSmugTimer = null;
+  let missCloseDismissals = 0;
+  let missInversionTimer = null;
+
+  function presentMiss(text, scare, withSound) {
     if (!miss) return;
     if (withSound) missChime();
     if (missBubble) {
-      missBubble.textContent = missLines[missLineIdx % missLines.length];
-      missLineIdx++;
+      if (text) {
+        missBubble.textContent = text;
+      } else {
+        missBubble.textContent = missLines[missLineIdx % missLines.length];
+        missLineIdx++;
+      }
     }
+    clearTimeout(missScareTimer);
+    clearTimeout(missSmugTimer);
     miss.classList.remove('is-smug');
     miss.classList.remove('is-scared');
     miss.classList.add('is-here');
     miss.setAttribute('aria-hidden', 'false');
     if (scare) {
       miss.classList.add('is-scared');
-      setTimeout(() => miss.classList.remove('is-scared'), 950);
+      missScareTimer = setTimeout(() => miss.classList.remove('is-scared'), 950);
       if (!prefersReducedMotion) {
         document.body.classList.add('is-glitching');
         setTimeout(() => document.body.classList.remove('is-glitching'), 480);
       }
     }
     // The smile turns smug shortly after arrival
-    setTimeout(() => miss.classList.add('is-smug'), 1400);
+    missSmugTimer = setTimeout(() => miss.classList.add('is-smug'), 1400);
     clearTimeout(missTimer);
     missTimer = setTimeout(dismissMiss, 7000);
   }
+
+  function summonMiss(scare, withSound) {
+    presentMiss(null, scare, withSound);
+  }
+
+  function summonMissLine(text, scare) {
+    presentMiss(text, scare, false);
+  }
+
   function dismissMiss() {
     if (!miss) return;
     miss.classList.remove('is-here');
+    miss.classList.remove('is-scared');
     miss.setAttribute('aria-hidden', 'true');
     clearTimeout(missTimer);
+    clearTimeout(missScareTimer);
+    clearTimeout(missSmugTimer);
   }
 
-  if (missClose) missClose.addEventListener('click', dismissMiss);
+  function registerMissCloseDismissal() {
+    missCloseDismissals++;
+    if (missCloseDismissals < 3) return;
+    missCloseDismissals = 0;
+    clearTimeout(missInversionTimer);
+    document.body.classList.add('is-inverted');
+    missInversionTimer = setTimeout(() => {
+      document.body.classList.remove('is-inverted');
+      summonMissLine('I warned you twice, darlin\u2019.', false);
+    }, prefersReducedMotion ? 4000 : 10000);
+  }
+
+  if (missClose) {
+    missClose.addEventListener('click', () => {
+      const wasHere = miss && miss.classList.contains('is-here');
+      dismissMiss();
+      if (wasHere) registerMissCloseDismissal();
+    });
+  }
   if (miss) {
     miss.addEventListener('pointerenter', () => clearTimeout(missTimer));
     miss.addEventListener('pointerleave', () => { missTimer = setTimeout(dismissMiss, 2500); });
@@ -533,5 +574,384 @@
       resizeTimer = setTimeout(() => { buildField(); if (!running) drawField(0); }, 180);
     });
   }
+
+  /* ---------- Orientation Film 1130-B ---------- */
+  const filmBtn = document.getElementById('filmBtn');
+  const filmOverlay = document.getElementById('filmOverlay');
+  const filmClose = document.getElementById('filmClose');
+  const filmPause = document.getElementById('filmPause');
+  const filmRestart = document.getElementById('filmRestart');
+  const leaderCount = document.getElementById('leaderCount');
+  const filmSlides = filmOverlay ? Array.from(filmOverlay.querySelectorAll('[data-film-slide]')) : [];
+  const filmFills = filmOverlay ? Array.from(filmOverlay.querySelectorAll('.film-segment-fill')) : [];
+  let filmOpen = false;
+  let filmPaused = false;
+  let filmEnded = false;
+  let filmStep = 0;
+  let filmElapsed = 0;
+  let filmStartedAt = 0;
+  let filmTimeout = null;
+  let filmTick = null;
+  let filmLastFocus = null;
+
+  function filmDuration(step) {
+    if (step === 0) return prefersReducedMotion ? 1200 : 2100;
+    return prefersReducedMotion ? 1800 : 2400;
+  }
+
+  function clearFilmTimers() {
+    clearTimeout(filmTimeout);
+    clearInterval(filmTick);
+    filmTimeout = null;
+    filmTick = null;
+  }
+
+  function renderFilm() {
+    const duration = filmDuration(filmStep);
+    const progress = Math.min(1, filmElapsed / duration);
+    filmSlides.forEach((slide, idx) => {
+      slide.classList.toggle('is-active', idx === filmStep);
+    });
+    filmFills.forEach((fill, idx) => {
+      fill.style.width = idx < filmStep ? '100%' : idx === filmStep ? (progress * 100).toFixed(1) + '%' : '0%';
+    });
+    if (leaderCount && filmStep === 0) {
+      const count = 3 - Math.floor(filmElapsed / (duration / 3));
+      leaderCount.textContent = String(Math.max(1, Math.min(3, count)));
+    }
+  }
+
+  function startFilmClock() {
+    clearFilmTimers();
+    if (!filmOpen || filmPaused || filmEnded) return;
+    filmStartedAt = performance.now() - filmElapsed;
+    filmTick = setInterval(() => {
+      filmElapsed = performance.now() - filmStartedAt;
+      renderFilm();
+    }, 50);
+    filmTimeout = setTimeout(advanceFilm, Math.max(0, filmDuration(filmStep) - filmElapsed));
+    renderFilm();
+  }
+
+  function showFilmStep(step) {
+    filmStep = step;
+    filmElapsed = 0;
+    filmEnded = false;
+    filmPaused = false;
+    if (filmPause) {
+      filmPause.textContent = 'Pause';
+      filmPause.setAttribute('aria-pressed', 'false');
+    }
+    renderFilm();
+    startFilmClock();
+  }
+
+  function advanceFilm() {
+    if (!filmOpen) return;
+    if (filmStep >= filmSlides.length - 1) {
+      filmElapsed = filmDuration(filmStep);
+      filmEnded = true;
+      filmPaused = true;
+      clearFilmTimers();
+      renderFilm();
+      if (filmPause) {
+        filmPause.textContent = 'Play';
+        filmPause.setAttribute('aria-pressed', 'true');
+      }
+      return;
+    }
+    showFilmStep(filmStep + 1);
+  }
+
+  function setFilmPaused(paused) {
+    if (!filmOpen) return;
+    if (filmEnded && paused) return;
+    if (filmEnded && !paused) {
+      showFilmStep(0);
+      return;
+    }
+    if (paused) {
+      filmElapsed = performance.now() - filmStartedAt;
+      filmPaused = true;
+      clearFilmTimers();
+      renderFilm();
+    } else {
+      filmPaused = false;
+      startFilmClock();
+    }
+    if (filmPause) {
+      filmPause.textContent = filmPaused ? 'Play' : 'Pause';
+      filmPause.setAttribute('aria-pressed', String(filmPaused));
+    }
+  }
+
+  function restartFilm() {
+    if (!filmOpen) return;
+    showFilmStep(0);
+  }
+
+  function openFilm() {
+    if (!filmOverlay) return;
+    filmLastFocus = document.activeElement;
+    filmOverlay.hidden = false;
+    filmOpen = true;
+    requestAnimationFrame(() => filmOverlay.classList.add('is-open'));
+    showFilmStep(0);
+    if (filmClose) filmClose.focus({ preventScroll: true });
+  }
+
+  function closeFilm() {
+    if (!filmOverlay || !filmOpen) return;
+    clearFilmTimers();
+    filmOpen = false;
+    filmPaused = false;
+    filmOverlay.classList.remove('is-open');
+    filmOverlay.hidden = true;
+    if (filmLastFocus && typeof filmLastFocus.focus === 'function') {
+      filmLastFocus.focus({ preventScroll: true });
+    }
+  }
+
+  if (filmBtn) filmBtn.addEventListener('click', openFilm);
+  if (filmClose) filmClose.addEventListener('click', closeFilm);
+  if (filmRestart) filmRestart.addEventListener('click', restartFilm);
+  if (filmPause) filmPause.addEventListener('click', () => setFilmPaused(!filmPaused));
+  if (filmOverlay) {
+    filmOverlay.addEventListener('click', (e) => {
+      if (e.target === filmOverlay) closeFilm();
+    });
+  }
+
+  /* ---------- Prune Variant (absolutely do not press) ---------- */
+  const pruneBtn = document.getElementById('pruneBtn');
+  const pruneVeil = document.getElementById('pruneVeil');
+  const pruneCountdown = document.getElementById('pruneCountdown');
+  const pruneCountNumber = document.getElementById('pruneCountNumber');
+  const mainEl = document.querySelector('main');
+  let pruning = false;
+  let pruneAbortReadyAt = 0;
+  let pruneTimers = [];
+  let pruneVeilTimer = null;
+
+  function pruneLater(fn, delay) {
+    const id = setTimeout(fn, delay);
+    pruneTimers.push(id);
+    return id;
+  }
+
+  function clearPruneTimers() {
+    pruneTimers.forEach((id) => clearTimeout(id));
+    pruneTimers = [];
+  }
+
+  function setPruneCount(value) {
+    if (pruneCountNumber) pruneCountNumber.textContent = String(value);
+  }
+
+  function restorePrune(assistantIntervenes) {
+    if (!pruning) return;
+    pruning = false;
+    clearPruneTimers();
+    document.body.classList.remove('is-pruning');
+    if (mainEl) mainEl.classList.remove('pruning');
+    if (pruneCountdown) pruneCountdown.classList.remove('is-visible');
+    if (pruneBtn) pruneBtn.disabled = false;
+    if (pruneVeil) {
+      pruneVeil.classList.remove('is-active');
+      pruneVeil.classList.add('is-restored');
+      clearTimeout(pruneVeilTimer);
+      pruneVeilTimer = setTimeout(() => pruneVeil.classList.remove('is-restored'), 650);
+    }
+    if (assistantIntervenes) {
+      summonMissLine('Nice try, sugar. This variant is under MY protection.', false);
+      showToast('Timeline restored by the assistant.');
+    }
+  }
+
+  function startPrune() {
+    if (pruning) return;
+    pruning = true;
+    pruneAbortReadyAt = performance.now() + 1000;
+    if (pruneBtn) pruneBtn.disabled = true;
+    if (pruneVeil) {
+      pruneVeil.classList.remove('is-restored');
+      pruneVeil.classList.add('is-active');
+    }
+    document.body.classList.add('is-pruning');
+    if (mainEl) mainEl.classList.add('pruning');
+    if (pruneCountdown) pruneCountdown.classList.add('is-visible');
+    setPruneCount(3);
+    pruneLater(() => setPruneCount(2), 900);
+    pruneLater(() => setPruneCount(1), 1800);
+    pruneLater(() => setPruneCount(0), 2700);
+    pruneLater(() => restorePrune(true), 3800);
+    pruneLater(() => restorePrune(false), 5000);
+  }
+
+  if (pruneBtn) pruneBtn.addEventListener('click', startPrune);
+  document.addEventListener('click', () => {
+    if (pruning && performance.now() >= pruneAbortReadyAt) restorePrune(false);
+  });
+
+  /* ---------- TemPad ---------- */
+  const tempadBtn = document.getElementById('tempadBtn');
+  const tempadOverlay = document.getElementById('tempadOverlay');
+  const tempadClose = document.getElementById('tempadClose');
+  const tempadStatus = document.getElementById('tempadStatus');
+  let tempadOpen = false;
+  let tempadNavigating = false;
+  let tempadNavTimer = null;
+  let tempadLastFocus = null;
+
+  function setTempadStatus(text) {
+    if (tempadStatus) tempadStatus.textContent = text;
+  }
+
+  function openTempad() {
+    if (!tempadOverlay || tempadOpen) return;
+    tempadLastFocus = document.activeElement;
+    tempadOverlay.hidden = false;
+    tempadOpen = true;
+    tempadNavigating = false;
+    tempadOverlay.classList.remove('is-opening');
+    setTempadStatus('Coordinates locked to Bengaluru Branch.');
+    requestAnimationFrame(() => tempadOverlay.classList.add('is-open'));
+    const firstDestination = tempadOverlay.querySelector('.tempad-destination');
+    if (firstDestination) firstDestination.focus({ preventScroll: true });
+  }
+
+  function closeTempad() {
+    if (!tempadOverlay || !tempadOpen) return;
+    clearTimeout(tempadNavTimer);
+    tempadNavTimer = null;
+    tempadNavigating = false;
+    tempadOpen = false;
+    tempadOverlay.classList.remove('is-open');
+    tempadOverlay.classList.remove('is-opening');
+    tempadOverlay.hidden = true;
+    setTempadStatus('Coordinates locked to Bengaluru Branch.');
+    if (tempadLastFocus && typeof tempadLastFocus.focus === 'function') {
+      tempadLastFocus.focus({ preventScroll: true });
+    }
+  }
+
+  if (tempadBtn) tempadBtn.addEventListener('click', openTempad);
+  if (tempadClose) tempadClose.addEventListener('click', closeTempad);
+  if (tempadOverlay) {
+    tempadOverlay.addEventListener('click', (e) => {
+      if (e.target === tempadOverlay) closeTempad();
+    });
+    tempadOverlay.querySelectorAll('.tempad-destination').forEach((destination) => {
+      destination.addEventListener('click', () => {
+        const url = destination.getAttribute('data-tempad-url');
+        if (!url || tempadNavigating) return;
+        tempadNavigating = true;
+        tempadOverlay.classList.add('is-opening');
+        const platformEl = destination.querySelector('.tempad-platform');
+        const platform = platformEl ? platformEl.textContent.trim() : 'the selected branch';
+        setTempadStatus('Opening a time door to ' + platform + '…');
+        tempadNavTimer = setTimeout(() => {
+          if (!tempadOpen) return;
+          if (url.indexOf('mailto:') === 0) {
+            window.location.href = url;
+          } else {
+            window.open(url, '_blank', 'noopener');
+          }
+          tempadNavigating = false;
+          closeTempad();
+        }, prefersReducedMotion ? 120 : 650);
+      });
+    });
+  }
+
+  /* ---------- Public intake: Variant Generator ---------- */
+  const variantForm = document.getElementById('variantForm');
+  const variantName = document.getElementById('variantName');
+  const offenseSelect = document.getElementById('offenseSelect');
+  const variantResult = document.getElementById('variantResult');
+  const variantPlaceholder = '<p class="variant-placeholder">Awaiting intake. Your file will appear here, stamped and regrettably official.</p>';
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (ch) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch]));
+  }
+
+  function djb2Hash(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash + str.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
+  if (variantForm && variantName && offenseSelect && variantResult) {
+    variantForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const displayName = variantName.value.trim().replace(/\s+/g, ' ') || 'UNNAMED VARIANT';
+      const words = displayName.split(' ');
+      const surnameRaw = words[words.length - 1];
+      const givenRaw = words.length > 1 ? words.slice(0, -1).join(' ') : '—';
+      const offense = offenseSelect.value;
+      const selectedOption = offenseSelect.options[offenseSelect.selectedIndex];
+      const department = selectedOption ? (selectedOption.getAttribute('data-department') || '') : '';
+      const hash = djb2Hash(displayName + '|' + offense);
+      const initialMatch = surnameRaw.match(/[A-Za-z]/) || displayName.match(/[A-Za-z]/);
+      const initial = initialMatch ? initialMatch[0].toUpperCase() : 'X';
+      const variantNo = initial + '-' + String(1000 + (hash % 9000));
+      const clearance = 'Level ' + ((hash % 9) + 1);
+      const surname = escapeHtml(surnameRaw.toUpperCase());
+      const given = escapeHtml(givenRaw.toUpperCase());
+      variantResult.innerHTML =
+        '<article class="variant-card">' +
+          '<header class="variant-card-head">' +
+            '<span class="variant-mini-seal" aria-hidden="true">TVA</span>' +
+            '<span class="variant-card-heading"><span class="variant-card-kicker">Public Intake Copy</span><span class="variant-card-title">Variant Identification</span></span>' +
+            '<span class="variant-stamp" aria-hidden="true">Filed</span>' +
+          '</header>' +
+          '<dl class="variant-fields">' +
+            '<div><dt>Surname</dt><dd>' + surname + '</dd></div>' +
+            '<div><dt>Given Name</dt><dd>' + given + '</dd></div>' +
+            '<div><dt>Variant Nº</dt><dd>' + escapeHtml(variantNo) + '</dd></div>' +
+            '<div><dt>Clearance</dt><dd>' + escapeHtml(clearance) + '</dd></div>' +
+            '<div class="variant-field--wide"><dt>Department</dt><dd>' + escapeHtml(department) + '</dd></div>' +
+            '<div class="variant-field--wide"><dt>Status</dt><dd>' + escapeHtml(offense) + '</dd></div>' +
+          '</dl>' +
+          '<p class="variant-card-foot">Intake Nº ' + escapeHtml(variantNo) + ' · Bengaluru Branch · Forgotten on departure</p>' +
+          '<button class="variant-reset" type="button" data-reset-variant>File another</button>' +
+        '</article>';
+    });
+
+    variantResult.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-reset-variant]')) return;
+      variantForm.reset();
+      variantResult.innerHTML = variantPlaceholder;
+      variantName.focus({ preventScroll: true });
+    });
+  }
+
+  /* ---------- Shared keyboard controls ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (filmOpen) { closeFilm(); return; }
+      if (tempadOpen) { closeTempad(); return; }
+      if (pruning) { restorePrune(false); return; }
+    }
+    const target = e.target;
+    const typing = target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
+    );
+    if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey && !typing && !filmOpen && !tempadOpen) {
+      e.preventDefault();
+      openTempad();
+    }
+  });
 
 })();

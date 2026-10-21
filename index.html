@@ -58,6 +58,7 @@
     <span class="strip-item strip-coords" aria-hidden="true">T-Coord <span id="tCoords">— · —</span></span>
     <span class="strip-item strip-motto">For All Time. Always.</span>
     <button class="audit-btn" id="auditBtn" type="button" aria-pressed="false">Run Temporal Audit</button>
+    <button class="audit-btn tempad-btn" id="tempadBtn" type="button" aria-haspopup="dialog">TemPad</button>
   </header>
 
   <main>
@@ -140,6 +141,16 @@
       </div>
 
       <p class="zone-note">This card certifies that the bearer is a known temporal anomaly of the harmless kind: early.</p>
+
+      <div class="card-actions">
+        <button class="btn btn--ghost card-action" id="filmBtn" type="button" aria-haspopup="dialog" aria-label="Watch the Orientation Film">▶ Orientation Film 1130-B</button>
+
+        <div class="prune-panel" aria-labelledby="prunePanelTitle">
+          <p class="prune-panel-title" id="prunePanelTitle">Unauthorized Controls</p>
+          <button class="prune-btn" id="pruneBtn" type="button">Prune Variant E-1130</button>
+          <p class="prune-warning">Do not press. Seriously. — The Management</p>
+        </div>
+      </div>
     </section>
 
     <!-- TVA marquee divider -->
@@ -311,8 +322,177 @@
         </div>
         <p class="annotation annotation--file">correspondence is answered between launches. — the office</p>
       </section>
+
+      <!-- ANNEX — PUBLIC INTAKE -->
+      <section class="file reveal annex" id="annex-intake" aria-labelledby="annexTitle">
+        <span class="file-node" aria-hidden="true"></span>
+        <header class="file-head">
+          <span class="file-no">Annex · Public Intake</span>
+          <h2 class="file-title" id="annexTitle">File Your Own Variant</h2>
+          <span class="file-meta">Walk-ins accepted · No appointment survives contact with the timeline</span>
+        </header>
+
+        <p class="report">The TVA accepts walk-ins. Processing is instant and entirely unserious. State your name, confess the relevant temporal offense, and receive a file number before the ink has time to reconsider.</p>
+
+        <form class="intake-form" id="variantForm">
+          <div class="intake-field">
+            <label for="variantName">Variant name</label>
+            <input id="variantName" name="variantName" type="text" maxlength="24" autocomplete="name" placeholder="e.g. Temporal Tourist">
+          </div>
+          <div class="intake-field">
+            <label for="offenseSelect">Recorded offense</label>
+            <select id="offenseSelect" name="offenseSelect">
+              <option value="Arrived early to a launch" data-department="Early Access &amp; Anomalous Arrivals (Probationary)">Arrived early to a launch</option>
+              <option value="Read the entire changelog for fun" data-department="Department of Unnecessary Thoroughness">Read the entire changelog for fun</option>
+              <option value="Still uses the default wallpaper" data-department="Aesthetics Violations Unit">Still uses the default wallpaper</option>
+              <option value="Waits for reviews like everyone else" data-department="General Availability — Re-education Pending">Waits for reviews like everyone else</option>
+              <option value="Uses light mode at 2 AM" data-department="Crimes Against the Dark Timeline">Uses light mode at 2 AM</option>
+            </select>
+          </div>
+          <button class="btn btn--solid intake-submit" type="submit">File My Variant</button>
+        </form>
+        <noscript><p class="intake-note">The intake desk requires JavaScript, tragically.</p></noscript>
+
+        <div class="variant-result" id="variantResult" aria-live="polite">
+          <p class="variant-placeholder">Awaiting intake. Your file will appear here, stamped and regrettably official.</p>
+        </div>
+        <p class="intake-note">Files are generated locally and forgotten immediately, like all good bureaucracy.</p>
+      </section>
     </div>
   </main>
+
+  <!-- ========== ORIENTATION FILM ========== -->
+  <div class="overlay film-overlay" id="filmOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="filmTitle">
+    <div class="film-player">
+      <div class="film-topbar">
+        <span id="filmTitle">TVA Orientation Film 1130-B</span>
+        <span class="film-reel">Reel 01 · Handle with temporal care</span>
+        <button class="overlay-close" id="filmClose" type="button" aria-label="Close orientation film">×</button>
+      </div>
+
+      <div class="film-screen">
+        <div class="film-slide film-slide--leader is-active" data-film-slide="0">
+          <div class="leader-ring" aria-hidden="true">
+            <span class="leader-sweep"></span>
+            <span class="leader-count" id="leaderCount">3</span>
+          </div>
+          <p class="film-kicker">TVA Orientation</p>
+          <p class="film-small">Bengaluru Branch Office · Orientation Film 1130-B</p>
+        </div>
+
+        <div class="film-slide" data-film-slide="1">
+          <p class="film-kicker">A message from the Authority</p>
+          <h3>Welcome to the Time Variance Authority</h3>
+          <p>Orientation Film 1130-B · Bengaluru Branch Office</p>
+        </div>
+
+        <div class="film-slide" data-film-slide="2">
+          <p class="film-kicker">Personnel introduction</p>
+          <h3>Meet the Variant</h3>
+          <img class="film-avatar" src="./avatar.jpg" alt="Identification photograph of Adwaith Varma" width="400" height="400">
+          <p class="film-name">Varma, Adwaith · Variant Nº E-1130</p>
+        </div>
+
+        <div class="film-slide" data-film-slide="3">
+          <p class="film-kicker">Charge sheet</p>
+          <h3>His Offense: Arriving Early</h3>
+          <p>The subject reaches new products before they launch. Repeatedly. This is not a drill.</p>
+        </div>
+
+        <div class="film-slide" data-film-slide="4">
+          <p class="film-kicker">Standing orders</p>
+          <h3>Protocol</h3>
+          <p>Do not prune. Monitor. Read his reports. He is early, not dangerous.</p>
+        </div>
+
+        <div class="film-slide film-slide--end" data-film-slide="5">
+          <p class="film-end-title">For All Time. Always.</p>
+          <p>End of film · Please rewind before returning to the shelf</p>
+        </div>
+
+        <div class="film-scratches" aria-hidden="true"></div>
+        <div class="film-grain" aria-hidden="true"></div>
+      </div>
+
+      <div class="film-progress" id="filmProgress" aria-hidden="true">
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+        <span class="film-segment"><span class="film-segment-fill"></span></span>
+      </div>
+
+      <div class="film-controls">
+        <button class="film-control" id="filmPause" type="button" aria-pressed="false">Pause</button>
+        <button class="film-control" id="filmRestart" type="button">Restart</button>
+        <span class="film-control-note">Sound unavailable. The projector is older than several timelines.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TEMPAD ========== -->
+  <div class="overlay tempad-overlay" id="tempadOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="tempadTitle">
+    <div class="tempad-panel">
+      <button class="overlay-close tempad-close" id="tempadClose" type="button" aria-label="Close TemPad">×</button>
+      <p class="tempad-kicker" id="tempadTitle">TemPad · Branch Selection</p>
+      <h2 class="tempad-heading">Choose a destination timeline</h2>
+      <p class="tempad-note">Coordinates are checked twice. Doors are final, mostly.</p>
+
+      <div class="tempad-stage">
+        <div class="tempad-list tempad-list--left">
+          <button class="tempad-destination" type="button" data-tempad-url="https://x.com/TheAdwaithVarma">
+            <span class="tempad-platform">X</span>
+            <span class="tempad-branch">The Launch Timeline</span>
+            <span class="tempad-coord">BRN-001 · Primary signal</span>
+          </button>
+          <button class="tempad-destination" type="button" data-tempad-url="https://instagram.com/theadwaithvarma">
+            <span class="tempad-platform">Instagram</span>
+            <span class="tempad-branch">The Visual Branch</span>
+            <span class="tempad-coord">BRN-002 · Pictorial</span>
+          </button>
+          <button class="tempad-destination" type="button" data-tempad-url="https://t.me/TheAdwaithVarma">
+            <span class="tempad-platform">Telegram</span>
+            <span class="tempad-branch">The Forwarded Branch</span>
+            <span class="tempad-coord">BRN-003 · Relay active</span>
+          </button>
+        </div>
+
+        <div class="time-door" aria-hidden="true">
+          <span class="door-panel door-panel--left"></span>
+          <span class="door-panel door-panel--right"></span>
+          <span class="door-seam"></span>
+          <span class="door-light"></span>
+        </div>
+
+        <div class="tempad-list tempad-list--right">
+          <button class="tempad-destination" type="button" data-tempad-url="https://github.com/theadwaithvarma">
+            <span class="tempad-platform">GitHub</span>
+            <span class="tempad-branch">The Quiet Branch</span>
+            <span class="tempad-coord">BRN-004 · Low transmission</span>
+          </button>
+          <button class="tempad-destination" type="button" data-tempad-url="https://www.linkedin.com/in/adwaith-varma-a1aa5a344">
+            <span class="tempad-platform">LinkedIn</span>
+            <span class="tempad-branch">The Formal Branch</span>
+            <span class="tempad-coord">BRN-005 · Complete sentences</span>
+          </button>
+          <button class="tempad-destination" type="button" data-tempad-url="mailto:varmaadwaith872@gmail.com">
+            <span class="tempad-platform">Email</span>
+            <span class="tempad-branch">Direct Transmission</span>
+            <span class="tempad-coord">BRN-006 · No intermediary</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="tempad-status" id="tempadStatus" role="status">Coordinates locked to Bengaluru Branch.</p>
+    </div>
+  </div>
+
+  <div id="pruneVeil" aria-hidden="true"></div>
+  <div class="prune-countdown" id="pruneCountdown" aria-hidden="true">
+    <small>Pruning in</small>
+    <span id="pruneCountNumber">3</span>
+  </div>
 
   <!-- ========== FOOTER ========== -->
   <footer class="colophon">
@@ -325,65 +505,97 @@
   <!-- ========== THE TVA ASSISTANT (she watches the timeline) ========== -->
   <div class="miss" id="missMinutes" aria-hidden="true">
     <div class="miss-bubble" id="missBubble">Hey y&rsquo;all!</div>
-    <svg class="miss-svg" viewBox="0 0 200 214" role="img" aria-label="Miss Minutes, the TVA's animated clock assistant">
-      <!-- legs + shoes -->
-      <line x1="82" y1="168" x2="78" y2="192" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <line x1="118" y1="168" x2="122" y2="192" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <ellipse cx="72" cy="198" rx="16" ry="7" fill="#221A14"/>
-      <ellipse cx="128" cy="198" rx="16" ry="7" fill="#221A14"/>
-      <!-- arms with gloved hands -->
-      <path class="miss-arm miss-arm--l" d="M30 106 Q8 100 12 80" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <path class="miss-arm miss-arm--r" d="M170 106 Q194 94 188 70" fill="none" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
-      <circle cx="13" cy="76" r="9" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
-      <circle cx="189" cy="66" r="9" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
-      <!-- body -->
-      <circle cx="100" cy="102" r="80" fill="#E8641C" stroke="#221A14" stroke-width="5"/>
-      <ellipse cx="72" cy="58" rx="30" ry="16" fill="#FFFFFF" opacity="0.22" transform="rotate(-24 72 58)"/>
-      <circle cx="100" cy="102" r="61" fill="#F8EED4" stroke="#221A14" stroke-width="3"/>
-      <!-- dial ticks (12/3/6/9 bold) -->
-      <g stroke="#221A14" stroke-linecap="round">
-        <line x1="100" y1="45" x2="100" y2="56" stroke-width="5"/>
-        <line x1="100" y1="148" x2="100" y2="159" stroke-width="5"/>
-        <line x1="43" y1="102" x2="54" y2="102" stroke-width="5"/>
-        <line x1="146" y1="102" x2="157" y2="102" stroke-width="5"/>
-        <g stroke-width="3">
-          <line x1="60" y1="62" x2="66" y2="68"/><line x1="134" y1="136" x2="140" y2="142"/>
-          <line x1="140" y1="62" x2="134" y2="68"/><line x1="66" y1="136" x2="60" y2="142"/>
+    <svg class="miss-svg" viewBox="0 0 220 232" role="img" aria-label="Miss Minutes, the TVA's animated clock assistant">
+      <g class="miss-normal">
+        <!-- thin legs and orange rounded shoes -->
+        <line x1="91" y1="171" x2="89" y2="203" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+        <line x1="129" y1="171" x2="131" y2="203" stroke="#221A14" stroke-width="6" stroke-linecap="round"/>
+        <ellipse cx="81" cy="209" rx="18" ry="8" fill="#E8641C" stroke="#221A14" stroke-width="3"/>
+        <ellipse cx="139" cy="209" rx="18" ry="8" fill="#E8641C" stroke="#221A14" stroke-width="3"/>
+
+        <!-- akimbo arm on screen-left, with a white glove -->
+        <g class="miss-arm miss-arm--l">
+          <path d="M43 112 Q24 128 20 148" fill="none" stroke="#9C3D0E" stroke-width="7" stroke-linecap="round"/>
+          <path d="M20 139 Q8 143 10 154 Q12 166 24 165 Q35 164 34 152 Q33 141 20 139 Z" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
         </g>
-      </g>
-      <!-- little TVA badge pinned to the rim -->
-      <circle cx="47" cy="152" r="9" fill="#14453D" stroke="#C2A24C" stroke-width="2.5"/>
-      <text x="47" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#EDE6D6">T</text>
-      <!-- clock hands, set to almost-launch o'clock (behind the face) -->
-      <line x1="100" y1="102" x2="88" y2="76" stroke="#221A14" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
-      <line x1="100" y1="102" x2="122" y2="94" stroke="#221A14" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>
-            <!-- brows -->
-      <g class="miss-brows" stroke="#221A14" stroke-width="3.5" stroke-linecap="round" fill="none">
-        <path d="M64 68 Q78 60 92 67"/>
-        <path d="M108 67 Q122 60 136 68"/>
-      </g>
-      <!-- eyes with lashes -->
-      <g class="miss-eyes">
-        <ellipse cx="78" cy="88" rx="10" ry="12" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
-        <ellipse cx="122" cy="88" rx="10" ry="12" fill="#fff" stroke="#221A14" stroke-width="2.5"/>
-        <circle class="miss-pupil" cx="78" cy="90" r="4.8" fill="#221A14"/>
-        <circle class="miss-pupil" cx="122" cy="90" r="4.8" fill="#221A14"/>
-        <circle cx="79.5" cy="88" r="1.6" fill="#fff"/>
-        <circle cx="123.5" cy="88" r="1.6" fill="#fff"/>
-        <g stroke="#221A14" stroke-width="2.6" stroke-linecap="round">
-          <path d="M64 79 l-7 -4"/><path d="M67 74 l-5 -6"/>
-          <path d="M136 79 l7 -4"/><path d="M133 74 l5 -6"/>
+
+        <!-- raised pointing arm on screen-right, with a white glove -->
+        <g class="miss-arm miss-arm--r">
+          <path d="M177 110 Q194 88 198 65" fill="none" stroke="#9C3D0E" stroke-width="7" stroke-linecap="round"/>
+          <path d="M190 68 Q186 55 194 51 L196 35 Q197 28 202 28 Q207 28 207 35 L206 50 Q215 53 213 63 Q211 74 200 75 Q191 75 190 68 Z" fill="#FFF7E6" stroke="#221A14" stroke-width="3"/>
+          <path d="M191 61 Q199 57 207 60" fill="none" stroke="#221A14" stroke-width="2" stroke-linecap="round"/>
         </g>
+
+        <!-- one orange disc: the face lives directly on this surface -->
+        <circle cx="110" cy="103" r="77" fill="#E8641C" stroke="#221A14" stroke-width="5"/>
+        <circle cx="110" cy="103" r="68" fill="none" stroke="#C74E10" stroke-width="2" opacity="0.55"/>
+
+        <!-- short rim ticks inside the disc edge -->
+        <g stroke="#221A14" stroke-linecap="round">
+          <line x1="110" y1="34" x2="110" y2="48" stroke-width="4"/>
+          <line x1="145" y1="45" x2="141" y2="56" stroke-width="3"/>
+          <line x1="169" y1="71" x2="159" y2="78" stroke-width="3"/>
+          <line x1="180" y1="103" x2="166" y2="103" stroke-width="4"/>
+          <line x1="169" y1="135" x2="159" y2="128" stroke-width="3"/>
+          <line x1="145" y1="161" x2="141" y2="150" stroke-width="3"/>
+          <line x1="110" y1="172" x2="110" y2="158" stroke-width="4"/>
+          <line x1="75" y1="161" x2="79" y2="150" stroke-width="3"/>
+          <line x1="51" y1="135" x2="61" y2="128" stroke-width="3"/>
+          <line x1="40" y1="103" x2="54" y2="103" stroke-width="4"/>
+          <line x1="51" y1="71" x2="61" y2="78" stroke-width="3"/>
+          <line x1="75" y1="45" x2="79" y2="56" stroke-width="3"/>
+        </g>
+
+        <!-- thin arched brows -->
+        <g class="miss-brows" stroke="#221A14" stroke-width="3" stroke-linecap="round" fill="none">
+          <path d="M70 65 Q84 56 99 64"/>
+          <path d="M121 64 Q136 56 150 65"/>
+        </g>
+
+        <!-- large eyes, pupils looking up-left -->
+        <g class="miss-eyes">
+          <ellipse cx="84" cy="88" rx="13" ry="19" fill="#FFFFFF" stroke="#221A14" stroke-width="2.5"/>
+          <ellipse cx="136" cy="88" rx="13" ry="19" fill="#FFFFFF" stroke="#221A14" stroke-width="2.5"/>
+          <circle class="miss-pupil" cx="80" cy="82" r="6.5" fill="#221A14"/>
+          <circle class="miss-pupil" cx="132" cy="82" r="6.5" fill="#221A14"/>
+          <circle cx="82" cy="79" r="1.8" fill="#FFFFFF"/>
+          <circle cx="134" cy="79" r="1.8" fill="#FFFFFF"/>
+          <g stroke="#221A14" stroke-width="2.4" stroke-linecap="round">
+            <path d="M72 72 L64 67"/>
+            <path d="M76 69 L70 61"/>
+            <path d="M81 68 L78 59"/>
+            <path d="M148 72 L156 67"/>
+            <path d="M144 69 L150 61"/>
+            <path d="M139 68 L142 59"/>
+          </g>
+        </g>
+
+        <!-- tiny nose and small mouth states -->
+        <circle cx="110" cy="111" r="2.6" fill="#221A14"/>
+        <path class="miss-mouth miss-mouth--smile" d="M96 121 Q110 137 124 121 Q110 128 96 121 Z" fill="#7B241C"/>
+        <path class="miss-mouth miss-mouth--smile" d="M101 123 Q110 128 119 123 Q110 130 101 123 Z" fill="#FFFFFF"/>
+        <ellipse class="miss-mouth miss-mouth--scare" cx="110" cy="128" rx="7" ry="9" fill="#7B241C"/>
+        <path class="miss-mouth miss-mouth--smirk" d="M99 128 Q115 131 124 120" fill="none" stroke="#7B241C" stroke-width="3.5" stroke-linecap="round"/>
       </g>
-      <!-- mouths: smile / scare / smirk -->
-      <path class="miss-mouth miss-mouth--smile" d="M79 122 Q100 143 121 122 Q100 131 79 122 Z" fill="#B03A2E" stroke="#7B241C" stroke-width="1.5"/>
-      <ellipse class="miss-mouth miss-mouth--scare" cx="100" cy="128" rx="9" ry="12" fill="#7B241C"/>
-      <path class="miss-mouth miss-mouth--smirk" d="M82 126 Q104 138 119 120" fill="none" stroke="#7B241C" stroke-width="4" stroke-linecap="round"/>
-      <!-- blush -->
-      <circle cx="60" cy="112" r="6.5" fill="#E8641C" opacity="0.5"/>
-      <circle cx="140" cy="112" r="6.5" fill="#E8641C" opacity="0.5"/>
-      <!-- centre pin -->
-      <circle cx="100" cy="102" r="5" fill="#B3352B" stroke="#221A14" stroke-width="2"/>
+
+      <g class="miss-ghost" transform="translate(110 110) scale(1.05) translate(-110 -110)" aria-hidden="true">
+        <!-- raised pale arms behind the sheet form -->
+        <path d="M44 110 Q13 91 19 54" fill="none" stroke="#221A14" stroke-width="15" stroke-linecap="round"/>
+        <path d="M44 110 Q13 91 19 54" fill="none" stroke="#E9E5D8" stroke-width="9" stroke-linecap="round"/>
+        <path d="M176 110 Q207 91 201 54" fill="none" stroke="#221A14" stroke-width="15" stroke-linecap="round"/>
+        <path d="M176 110 Q207 91 201 54" fill="none" stroke="#E9E5D8" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="20" cy="49" r="11" fill="#E9E5D8" stroke="#221A14" stroke-width="3"/>
+        <circle cx="200" cy="49" r="11" fill="#E9E5D8" stroke="#221A14" stroke-width="3"/>
+
+        <!-- pale sheet-disc with a wavy ghost hem -->
+        <path d="M35 103 C35 53 69 23 110 23 C151 23 185 53 185 103 L185 174 Q172 158 158 176 Q144 193 130 176 Q115 159 100 177 Q86 193 71 176 Q57 159 43 176 Q35 185 35 169 Z" fill="#E9E5D8" stroke="#221A14" stroke-width="4" stroke-linejoin="round"/>
+
+        <!-- hollow face -->
+        <ellipse cx="84" cy="91" rx="13" ry="25" fill="#221A14"/>
+        <ellipse cx="136" cy="91" rx="13" ry="25" fill="#221A14"/>
+        <circle cx="110" cy="119" r="2.5" fill="#221A14"/>
+        <ellipse cx="110" cy="140" rx="7" ry="9" fill="#221A14"/>
+      </g>
     </svg>
     <button class="miss-close" id="missClose" type="button" aria-label="Dismiss the TVA assistant">×</button>
   </div>
