@@ -199,7 +199,7 @@
     if (Number.isFinite(v)) liveState[el.getAttribute('data-live')] = v;
   });
 
-  // Inject a strength meter into each signal card + a grand-total readout
+  // Inject a strength meter into each signal card
   const meterFills = {};
   document.querySelectorAll('[data-live]').forEach((el) => {
     const key = el.getAttribute('data-live');
@@ -261,15 +261,9 @@
     if (Number.isFinite(liveState[key])) buildOdometer(el, liveState[key]);
   });
 
-  let signalTotalEl = null;
-  const signalsList = document.querySelector('.signals');
-  if (signalsList) {
-    const total = document.createElement('p');
-    total.className = 'signal-total';
-    total.innerHTML = 'Total recorded across all timelines: <b id="signalTotal">—</b>';
-    signalsList.after(total);
-    signalTotalEl = total.querySelector('#signalTotal');
-  }
+  /* No grand total: summing followers across platforms counts the same
+     people repeatedly and means nothing, so the readout was removed
+     (2026-10-22, user-spotted). Per-signal counts only. */
 
   function refreshMeters(changedKey) {
     const max = Math.max(1, ...Object.values(liveState));
@@ -280,10 +274,6 @@
       const meterEl = meterFills[key].parentElement;
       if (meterEl) meterEl.style.setProperty('--needle', (pct / 100).toFixed(3));
     });
-    if (signalTotalEl) {
-      const sum = Object.values(liveState).reduce((a, b) => a + b, 0);
-      signalTotalEl.textContent = sum.toLocaleString('en-IN');
-    }
     if (changedKey) {
       const el = document.querySelector('[data-live="' + changedKey + '"]');
       const card = el && el.closest('.signal');

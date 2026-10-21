@@ -1044,18 +1044,6 @@ main.is-nudged { animation: stampNudge 0.12s ease-out; }
   0% { box-shadow: 0 0 0 0 rgba(232, 100, 28, 0.45); }
   100% { box-shadow: 0 0 0 14px rgba(232, 100, 28, 0); }
 }
-.signal-total {
-  margin-top: 1.4rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-.signal-total b { color: var(--orange-deep); font-size: 1.05rem; }
-
 /* Strip extras */
 .strip-coords { font-family: var(--font-mono); }
 .audit-btn {
