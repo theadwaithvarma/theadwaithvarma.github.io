@@ -7,13 +7,29 @@
 
   /* ---------- Scroll reveals ---------- */
   const revealEls = document.querySelectorAll('.reveal');
+  function nudgeMain() {
+    const m = document.querySelector('main');
+    if (!m) return;
+    m.classList.remove('is-nudged');
+    void m.offsetWidth;
+    m.classList.add('is-nudged');
+    setTimeout(() => m.classList.remove('is-nudged'), 200);
+  }
   if ('IntersectionObserver' in window && !prefersReducedMotion) {
     const io = new IntersectionObserver((entries) => {
+      let batch = 0;
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          if (entry.target.classList.contains('file')) entry.target.classList.add('is-opened');
-          io.unobserve(entry.target);
+          const el = entry.target;
+          // paper-feed cascade: sections arriving together settle 60ms apart
+          el.style.transitionDelay = (batch++ * 60) + 'ms';
+          el.classList.add('is-visible');
+          if (el.classList.contains('file')) {
+            el.classList.add('is-opened');
+            nudgeMain();
+          }
+          io.unobserve(el);
+          setTimeout(() => { el.style.transitionDelay = ''; }, 1100);
         }
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
@@ -193,7 +209,7 @@
     Object.keys(meterFills).forEach((key) => {
       const n = liveState[key] || 0;
       const pct = Math.max(3, (Math.sqrt(n) / Math.sqrt(max)) * 100);
-      meterFills[key].style.width = pct.toFixed(1) + '%';
+      meterFills[key].style.transform = 'scaleX(' + (pct / 100).toFixed(3) + ')';
     });
     if (signalTotalEl) {
       const sum = Object.values(liveState).reduce((a, b) => a + b, 0);
@@ -296,25 +312,10 @@
     setTimeout(() => cardScene.classList.add('is-dealt'), 120);
   }
 
-  /* ---------- The TVA assistant (Miss Minutes homage, original art) ---------- */
-  const miss = document.getElementById('missMinutes');
-  const missBubble = document.getElementById('missBubble');
-  const missClose = document.getElementById('missClose');
+  /* ---------- The TVA seal ---------- */
   const tvaSeal = document.getElementById('tvaSeal');
-  let missTimer = null;
-  let missIdleFired = false;
-
-  const missLines = [
-    'Hey y\u2019all!',
-    'This variant\u2019s been flagged \u201Cearly\u201D 214 times.',
-    'He gets in before the doors even open. Every time.',
-    'Prunin\u2019 is above my pay grade, sugar.',
-    'The loom\u2019s fine. I checked. Twice.'
-  ];
-  let missLineIdx = 0;
-
   let audioCtx = null;
-  function missChime() {
+  function sealChime() {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       const t0 = audioCtx.currentTime;
@@ -333,98 +334,17 @@
     } catch (e) { /* silence is also very TVA */ }
   }
 
-  let missScareTimer = null;
-  let missSmugTimer = null;
-  let missCloseDismissals = 0;
-  let missInversionTimer = null;
-
-  function presentMiss(text, scare, withSound) {
-    if (!miss) return;
-    if (withSound) missChime();
-    if (missBubble) {
-      if (text) {
-        missBubble.textContent = text;
-      } else {
-        missBubble.textContent = missLines[missLineIdx % missLines.length];
-        missLineIdx++;
-      }
-    }
-    clearTimeout(missScareTimer);
-    clearTimeout(missSmugTimer);
-    miss.classList.remove('is-smug');
-    miss.classList.remove('is-scared');
-    miss.classList.add('is-here');
-    miss.setAttribute('aria-hidden', 'false');
-    if (scare) {
-      miss.classList.add('is-scared');
-      missScareTimer = setTimeout(() => miss.classList.remove('is-scared'), 950);
-      if (!prefersReducedMotion) {
-        document.body.classList.add('is-glitching');
-        setTimeout(() => document.body.classList.remove('is-glitching'), 480);
-      }
-    }
-    // The smile turns smug shortly after arrival
-    missSmugTimer = setTimeout(() => miss.classList.add('is-smug'), 1400);
-    clearTimeout(missTimer);
-    missTimer = setTimeout(dismissMiss, 7000);
-  }
-
-  function summonMiss(scare, withSound) {
-    presentMiss(null, scare, withSound);
-  }
-
-  function summonMissLine(text, scare) {
-    presentMiss(text, scare, false);
-  }
-
-  function dismissMiss() {
-    if (!miss) return;
-    miss.classList.remove('is-here');
-    miss.classList.remove('is-scared');
-    miss.setAttribute('aria-hidden', 'true');
-    clearTimeout(missTimer);
-    clearTimeout(missScareTimer);
-    clearTimeout(missSmugTimer);
-  }
-
-  function registerMissCloseDismissal() {
-    missCloseDismissals++;
-    if (missCloseDismissals < 3) return;
-    missCloseDismissals = 0;
-    clearTimeout(missInversionTimer);
-    document.body.classList.add('is-inverted');
-    missInversionTimer = setTimeout(() => {
-      document.body.classList.remove('is-inverted');
-      summonMissLine('I warned you twice, darlin\u2019.', false);
-    }, prefersReducedMotion ? 4000 : 10000);
-  }
-
-  if (missClose) {
-    missClose.addEventListener('click', () => {
-      const wasHere = miss && miss.classList.contains('is-here');
-      dismissMiss();
-      if (wasHere) registerMissCloseDismissal();
-    });
-  }
-  if (miss) {
-    miss.addEventListener('pointerenter', () => clearTimeout(missTimer));
-    miss.addEventListener('pointerleave', () => { missTimer = setTimeout(dismissMiss, 2500); });
-    // She introduces herself once, if a visitor lingers
-    setTimeout(() => {
-      if (!missIdleFired) { missIdleFired = true; summonMiss(true, false); }
-    }, 26000);
-  }
   if (tvaSeal) {
-    const sealSummon = () => {
+    const sealPress = () => {
       tvaSeal.classList.remove('is-spinning');
       void tvaSeal.getBoundingClientRect();
       tvaSeal.classList.add('is-spinning');
-      summonMiss(false, true);
+      sealChime();
       showToast('The seal accepts your appeal.');
     };
-    tvaSeal.addEventListener('click', sealSummon);
+    tvaSeal.addEventListener('click', sealPress);
     tvaSeal.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sealSummon(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sealPress(); }
     });
   }
 
@@ -462,9 +382,17 @@
 
   /* ---------- Temporal audit mode ---------- */
   const auditBtn = document.getElementById('auditBtn');
+  const crtFlash = document.getElementById('crtFlash');
   if (auditBtn) {
     auditBtn.addEventListener('click', () => {
       const on = document.body.classList.toggle('audit');
+      // CRT power-on: a bright amber line blooms open for 280ms (power-off is a plain fade)
+      if (on && crtFlash && !prefersReducedMotion) {
+        crtFlash.classList.remove('is-on');
+        void crtFlash.offsetWidth;
+        crtFlash.classList.add('is-on');
+        setTimeout(() => crtFlash.classList.remove('is-on'), 400);
+      }
       auditBtn.setAttribute('aria-pressed', String(on));
       auditBtn.textContent = on ? 'End Audit' : 'Run Temporal Audit';
       showToast(on ? 'Temporal audit running — timeline holding.' : 'Audit closed. As you were.');
@@ -476,7 +404,7 @@
   const cardZone = document.querySelector('.card-zone');
   if (canvas && cardZone) {
     const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, threads = [], running = false, rafId = null;
+    let W = 0, H = 0, threads = [], running = false, rafId = null, heroVisible = false;
     const pointer = { x: -9999, y: -9999 };
 
     function buildField() {
@@ -497,7 +425,8 @@
         threads.push({
           baseY, amp: 14 + Math.random() * 26, speed: 0.12 + Math.random() * 0.2,
           phase: Math.random() * Math.PI * 2,
-          color: i % 3 === 2 ? '20,69,61' : '217,93,30',
+          color: i % 3 === 2 ? '20,69,61' : '232,100,28',
+          colorAudit: i % 3 === 2 ? '47,143,107' : '255,176,0',
           nodes
         });
       }
@@ -506,14 +435,17 @@
     function drawField(t) {
       ctx.clearRect(0, 0, W, H);
       const time = t * 0.001;
+      // audit mode re-inks the threads amber/green, like the rest of the terminal
+      const inAudit = document.body.classList.contains('audit');
       threads.forEach((th) => {
+        const tc = inAudit ? th.colorAudit : th.color;
         ctx.beginPath();
         for (let x = 0; x <= W; x += 14) {
           const y = th.baseY + Math.sin(x * 0.006 + th.phase + time * th.speed) * th.amp
             + Math.sin(x * 0.017 + th.phase * 2) * th.amp * 0.3;
           if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
-        ctx.strokeStyle = 'rgba(' + th.color + ',0.28)';
+        ctx.strokeStyle = 'rgba(' + tc + ',0.28)';
         ctx.lineWidth = 1;
         ctx.stroke();
         th.nodes.forEach((nd) => {
@@ -525,12 +457,12 @@
           const near = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / 170);
           ctx.beginPath();
           ctx.arc(x, y, nd.r + near * 2.6, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(' + th.color + ',' + (0.35 + near * 0.55) + ')';
+          ctx.fillStyle = 'rgba(' + tc + ',' + (0.35 + near * 0.55) + ')';
           ctx.fill();
           if (near > 0.25) {
             ctx.beginPath();
             ctx.arc(x, y, nd.r + 6 + near * 8, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(' + th.color + ',' + (near * 0.5) + ')';
+            ctx.strokeStyle = 'rgba(' + tc + ',' + (near * 0.5) + ')';
             ctx.stroke();
           }
         });
@@ -558,10 +490,16 @@
     drawField(0);
     if ('IntersectionObserver' in window) {
       new IntersectionObserver((entries) => {
-        entries.forEach((en) => { if (en.isIntersecting && !document.hidden) startField(); else stopField(); });
+        entries.forEach((en) => {
+          heroVisible = en.isIntersecting;
+          if (heroVisible && !document.hidden) startField(); else stopField();
+        });
       }, { threshold: 0.02 }).observe(cardZone);
-    } else { startField(); }
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stopField(); else startField(); });
+    } else { heroVisible = true; startField(); }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopField();
+      else if (heroVisible) startField();
+    });
     cardZone.addEventListener('pointermove', (e) => {
       const r = canvas.getBoundingClientRect();
       pointer.x = e.clientX - r.left;
@@ -613,7 +551,8 @@
       slide.classList.toggle('is-active', idx === filmStep);
     });
     filmFills.forEach((fill, idx) => {
-      fill.style.width = idx < filmStep ? '100%' : idx === filmStep ? (progress * 100).toFixed(1) + '%' : '0%';
+      const p = idx < filmStep ? 1 : idx === filmStep ? progress : 0;
+      fill.style.transform = 'scaleX(' + p.toFixed(3) + ')';
     });
     if (leaderCount && filmStep === 0) {
       const count = 3 - Math.floor(filmElapsed / (duration / 3));
@@ -748,7 +687,7 @@
     if (pruneCountNumber) pruneCountNumber.textContent = String(value);
   }
 
-  function restorePrune(assistantIntervenes) {
+  function restorePrune(showNotice) {
     if (!pruning) return;
     pruning = false;
     clearPruneTimers();
@@ -762,9 +701,8 @@
       clearTimeout(pruneVeilTimer);
       pruneVeilTimer = setTimeout(() => pruneVeil.classList.remove('is-restored'), 650);
     }
-    if (assistantIntervenes) {
-      summonMissLine('Nice try, sugar. This variant is under MY protection.', false);
-      showToast('Timeline restored by the assistant.');
+    if (showNotice) {
+      showToast('Timeline restored.');
     }
   }
 
