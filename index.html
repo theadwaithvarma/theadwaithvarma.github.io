@@ -46,15 +46,15 @@
   <!-- Temporal loom ticker tape -->
   <div class="loom-tape" aria-hidden="true">
     <div class="loom-track">
-      <span>Temporal loom: stable</span><i>✦</i><span>Branch E-1130: monitored, not pruned</span><i>✦</i><span>In case of incursion, remain calm and keep scrolling</span><i>✦</i><span>All variants must present identification upon request</span><i>✦</i><span>The sacred timeline thanks you for your patience</span><i>✦</i>
-      <span>Temporal loom: stable</span><i>✦</i><span>Branch E-1130: monitored, not pruned</span><i>✦</i><span>In case of incursion, remain calm and keep scrolling</span><i>✦</i><span>All variants must present identification upon request</span><i>✦</i><span>The sacred timeline thanks you for your patience</span><i>✦</i>
+      <span>Temporal loom: stable</span><i>✦</i><span>Branch E-1130: monitored, not pruned</span><i>✦</i><span>In case of incursion, remain calm and keep scrolling</span><i>✦</i><span>All variants must present identification upon request</span><i>✦</i><span>The sacred timeline thanks you for your patience</span><i>✦</i><span>Analyst M.'s jet ski expense request: denied (again)</span><i>✦</i><span>He Who Remains could not be reached for comment</span><i>✦</i>
+      <span>Temporal loom: stable</span><i>✦</i><span>Branch E-1130: monitored, not pruned</span><i>✦</i><span>In case of incursion, remain calm and keep scrolling</span><i>✦</i><span>All variants must present identification upon request</span><i>✦</i><span>The sacred timeline thanks you for your patience</span><i>✦</i><span>Analyst M.'s jet ski expense request: denied (again)</span><i>✦</i><span>He Who Remains could not be reached for comment</span><i>✦</i>
     </div>
   </div>
 
   <!-- ========== TOP STRIP ========== -->
   <header class="strip">
     <span class="strip-item">Time Variance Authority · Bengaluru Branch Office</span>
-    <span class="strip-item strip-clock">Temporal Chronometer · <time id="chronoClock" datetime="">--:--:--</time> IST</span>
+    <span class="strip-item strip-clock">Temporal Chronometer · <span class="flap-clock" aria-hidden="true"><span class="flap-tile" id="flapH">--</span><span class="flap-colon">:</span><span class="flap-tile" id="flapM">--</span><span class="flap-colon">:</span><span class="flap-tile" id="flapS">--</span></span> <time id="chronoClock" class="sr-only" datetime="">--:--:--</time> IST <span class="bulb bulb--strip" aria-hidden="true"></span></span>
     <span class="strip-item strip-coords" aria-hidden="true">T-Coord <span id="tCoords">— · —</span></span>
     <span class="strip-item strip-motto">For All Time. Always.</span>
     <button class="audit-btn" id="auditBtn" type="button" aria-pressed="false">Run Temporal Audit</button>
@@ -99,7 +99,7 @@
 
           <div class="card-body">
             <figure class="photo-block">
-              <div class="photo-window">
+              <div class="photo-window" id="photoWindow" tabindex="0" role="button" aria-label="Identification photograph of the variant. Activate to timeslip." title="Filed photograph. Slips occasionally.">
                 <img src="./avatar.jpg" alt="Identification photograph of the variant: a luminous figure in smoke, captured mid-anomaly" width="400" height="400">
                 <span class="corner corner--tl" aria-hidden="true"></span>
                 <span class="corner corner--tr" aria-hidden="true"></span>
@@ -127,9 +127,12 @@
 
           <p class="card-teal">Clearance Level 7 · Early Access · Monitor, Do Not Prune</p>
 
+          <div class="mag-stripe" aria-hidden="true"><span class="mag-scratch mag-scratch--a"></span><span class="mag-scratch mag-scratch--b"></span><span class="mag-scratch mag-scratch--c"></span></div>
+
           <footer class="card-foot">
             <div class="barcode" role="img" aria-label="Barcode encoding: THEADWAITHVARMA"></div>
-            <p class="card-no">Card Nº TVA-BLR-E1130</p>
+            <p class="card-no">Card Nº <span class="emboss">TVA-BLR-E1130</span></p>
+            <p class="card-valid">Valid Thru <span class="emboss">∞</span></p>
             <p class="card-return">If found, return to the Bengaluru Branch Office. Do not fold, spindle, or reset.</p>
           </footer>
 
@@ -146,7 +149,7 @@
         <button class="btn btn--ghost card-action" id="filmBtn" type="button" aria-haspopup="dialog" aria-label="Watch the Orientation Film">▶ Orientation Film 1130-B</button>
 
         <div class="prune-panel" aria-labelledby="prunePanelTitle">
-          <p class="prune-panel-title" id="prunePanelTitle">Unauthorized Controls</p>
+          <p class="prune-panel-title" id="prunePanelTitle">Unauthorized Controls <span class="bulb bulb--prune" aria-hidden="true"></span></p>
           <button class="prune-btn" id="pruneBtn" type="button">Prune Variant E-1130</button>
           <p class="prune-warning">Do not press. Seriously. — The Management</p>
         </div>
@@ -310,6 +313,8 @@
           <div class="assign-row"><dt>Posting</dt><dd>First impressions, with the India angle.</dd></div>
           <div class="assign-row"><dt>Observed</dt><dd>Linux setups that shouldn’t work but do.</dd></div>
           <div class="assign-row"><dt>Orders</dt><dd>Continue. Report anything the timeline isn’t ready for.</dd></div>
+          <div class="assign-row"><dt>Anticipating</dt><dd>The December 2026 incursion. He intends to arrive early.</dd></div>
+          <div class="assign-row"><dt>Petitions</dt><dd>One (1) jet ski subscription, to be expensed. Denied by the office; appealed by the analyst.</dd></div>
         </dl>
         </div>
       </section>
@@ -361,6 +366,12 @@
               <option value="Still uses the default wallpaper" data-department="Aesthetics Violations Unit">Still uses the default wallpaper</option>
               <option value="Waits for reviews like everyone else" data-department="General Availability — Re-education Pending">Waits for reviews like everyone else</option>
               <option value="Uses light mode at 2 AM" data-department="Crimes Against the Dark Timeline">Uses light mode at 2 AM</option>
+              <option value="Left before the post-credits scene" data-department="Department of Endings · Post-Credit Compliance">Left before the post-credits scene</option>
+              <option value="Spoiled the ending in the group chat" data-department="Nexus Events · Containment &amp; Consequences">Spoiled the ending in the group chat</option>
+              <option value="Called it 'just a superhero movie'" data-department="Department of Sacred Timeline Heresy">Called it 'just a superhero movie'</option>
+              <option value="Asked when the jet ski episode airs" data-department="Recreational Watercraft Requests (Denied)">Asked when the jet ski episode airs</option>
+              <option value="Tried to prune a Monday" data-department="Temporal Scheduling · Unauthorized Resets">Tried to prune a Monday</option>
+              <option value="Wore a horned helmet to a job interview" data-department="Variant Presentation &amp; Horn Compliance">Wore a horned helmet to a job interview</option>
             </select>
           </div>
           <button class="btn btn--solid intake-submit" type="submit">File My Variant</button>
@@ -417,7 +428,7 @@
         <div class="film-slide" data-film-slide="4">
           <p class="film-kicker">Standing orders</p>
           <h3>Protocol</h3>
-          <p>Do not prune. Monitor. Read his reports. He is early, not dangerous.</p>
+          <p>Do not prune. Monitor. Read his reports. He is early, not dangerous. Jet ski petitions are denied.</p>
         </div>
 
         <div class="film-slide film-slide--end" data-film-slide="5">
@@ -450,6 +461,7 @@
   <div class="overlay tempad-overlay" id="tempadOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="tempadTitle">
     <div class="tempad-panel">
       <button class="overlay-close tempad-close" id="tempadClose" type="button" aria-label="Close TemPad">×</button>
+      <div class="tempad-screen">
       <p class="tempad-kicker" id="tempadTitle">TemPad · Branch Selection</p>
       <h2 class="tempad-heading">Choose a destination timeline</h2>
       <p class="tempad-note">Coordinates are checked twice. Doors are final, mostly.</p>
@@ -474,6 +486,10 @@
         </div>
 
         <div class="time-door" aria-hidden="true">
+          <span class="door-screw door-screw--tl"></span>
+          <span class="door-screw door-screw--tr"></span>
+          <span class="door-screw door-screw--bl"></span>
+          <span class="door-screw door-screw--br"></span>
           <span class="door-panel door-panel--left"></span>
           <span class="door-panel door-panel--right"></span>
           <span class="door-seam"></span>
@@ -500,6 +516,7 @@
       </div>
 
       <p class="tempad-status" id="tempadStatus" role="status">Coordinates locked to Bengaluru Branch.</p>
+      </div>
     </div>
   </div>
 
@@ -524,6 +541,7 @@
     <span class="date-stamp" aria-hidden="true">Filed · BLR</span>
     <p>© 2026 Time Variance Authority, Bengaluru Branch (unofficial, obviously).</p>
     <p>This variant’s timeline remains unpruned.</p>
+    <p>No timelines were harmed in the making of this file. One jet ski was denied.</p>
     <p class="colophon-sign">— End of file · Processed by the Bengaluru Branch Office —</p>
     <p><a class="to-top" href="#idCard">Return to the card ↑</a></p>
   </footer>

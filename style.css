@@ -2182,3 +2182,407 @@ body.is-pruning .loom-tape {
   .audit-btn:active, .film-control:active, .overlay-close:active,
   .tempad-destination:active, .variant-reset:active, .signal:active, .btn:active { transform: none; }
 }
+
+/* ============================================================
+   V6.6 — FAN CUT + FUTURISTIC-BUT-OBSOLETE HARDWARE PASS
+   Canon-fluent touches played straight (timeslipping, the
+   redline, jet-ski paperwork), and the standing directive:
+   tomorrow's technology as imagined in the 1960s/70s, now worn,
+   chunky, and still running. Analog, mechanical, low-resolution,
+   physical. All animation stays transform/opacity; reduced
+   motion is honored per feature.
+   ============================================================ */
+
+/* Visually hidden but readable (the chronometer's time element) */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- 1. Timeslipping ---------- */
+.id-card {
+  --slip-echo-a: rgba(232, 100, 28, 0.45);
+  --slip-echo-b: rgba(20, 69, 61, 0.42);
+}
+body.audit .id-card {
+  --slip-echo-a: rgba(255, 176, 0, 0.50);
+  --slip-echo-b: rgba(47, 143, 107, 0.50);
+}
+.photo-window { cursor: pointer; }
+.photo-window:hover {
+  box-shadow: inset 0 0 0 1px rgba(239, 230, 208, .25), 0 0 0 2px rgba(232, 100, 28, .35);
+}
+.id-card.is-timeslipping { animation: timeslip .7s steps(1, end) both; }
+@keyframes timeslip {
+  0% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(0, 0) skewX(0deg);
+    box-shadow: var(--shadow-card), -12px 5px 0 -2px var(--slip-echo-a), 11px -6px 0 -2px var(--slip-echo-b);
+    filter: none;
+  }
+  14% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-9px, 3px) skewX(-2.5deg);
+    box-shadow: var(--shadow-card), -18px 7px 0 -2px var(--slip-echo-a), 15px -9px 0 -2px var(--slip-echo-b);
+    filter: brightness(1.06);
+  }
+  28% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(7px, -4px) skewX(1.8deg);
+    box-shadow: var(--shadow-card), 13px -6px 0 -2px var(--slip-echo-a), -12px 6px 0 -2px var(--slip-echo-b);
+    filter: none;
+  }
+  42% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-5px, -2px) skewX(-1.2deg);
+    box-shadow: var(--shadow-card), -10px 4px 0 -2px var(--slip-echo-a), 9px -4px 0 -2px var(--slip-echo-b);
+    filter: brightness(.94);
+    opacity: .88;
+  }
+  57% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(4px, 2px) skewX(.8deg);
+    box-shadow: var(--shadow-card), 8px 3px 0 -2px var(--slip-echo-a), -7px -3px 0 -2px var(--slip-echo-b);
+    filter: none;
+    opacity: 1;
+  }
+  71% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(-2px, 1px) skewX(-.4deg);
+    box-shadow: var(--shadow-card), -5px 2px 0 -2px var(--slip-echo-a), 4px -2px 0 -2px var(--slip-echo-b);
+  }
+  85% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(1px, 0) skewX(.15deg);
+    box-shadow: var(--shadow-card), 3px 1px 0 -2px var(--slip-echo-a), -2px -1px 0 -2px var(--slip-echo-b);
+  }
+  100% {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate(0, 0) skewX(0deg);
+    box-shadow: var(--shadow-card);
+    filter: none;
+    opacity: 1;
+  }
+}
+.id-card.is-timeslipping .photo-window img { animation: timeslipImg .7s steps(1, end) both; }
+@keyframes timeslipImg {
+  0% { transform: translate(0, 0); }
+  16% { transform: translate(5px, 0); }
+  33% { transform: translate(-4px, 1px); }
+  50% { transform: translate(3px, -1px); }
+  66% { transform: translate(-2px, 0); }
+  83% { transform: translate(1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------- 2. Odometer drums (File 02 counts) ---------- */
+.data-num { display: inline-flex; align-items: center; }
+.odo-digits { display: inline-flex; gap: 2px; }
+.odo-cell {
+  position: relative;
+  width: .78em;
+  height: 1.06em;
+  overflow: hidden;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #171008 0%, #2A1D10 46%, #120C06 54%, #241A10 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .75), inset 0 -1px 0 rgba(255, 246, 227, .14), 0 1px 0 rgba(255, 246, 227, .35);
+}
+.odo-cell::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, .65);
+  box-shadow: 0 1px 0 rgba(255, 246, 227, .10);
+}
+.odo-strip {
+  display: block;
+  transition: transform .5s cubic-bezier(.25, .8, .3, 1);
+  will-change: transform;
+}
+.odo-digits.is-rolling .odo-strip { transition: none; }
+.odo-digit {
+  display: block;
+  height: 1.06em;
+  line-height: 1.06em;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: #F3E3BC;
+}
+body.audit .odo-digit { color: #FFC95C; }
+
+/* ---------- 3. Analog gauge (File 02 strength meters) ---------- */
+.signal-meter {
+  position: relative;
+  height: 14px;
+  background: linear-gradient(180deg, rgba(36, 26, 18, .16), rgba(36, 26, 18, .07) 55%, rgba(36, 26, 18, .13));
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: visible;
+}
+.signal-meter::before {
+  /* tick scale: major ticks over minor ticks, along the base */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(36, 26, 18, .45) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, rgba(36, 26, 18, .25) 0 1px, transparent 1px 8px);
+  background-size: 100% 62%, 100% 36%;
+  background-position: bottom left, bottom left;
+  background-repeat: repeat-x;
+}
+.signal-meter::after {
+  /* the needle: a worn red marker riding to the measured value */
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: calc(var(--needle, 0) * 100%);
+  z-index: 3;
+  width: 2px;
+  height: 18px;
+  background: var(--stamp-red);
+  box-shadow: 0 0 0 .5px rgba(36, 26, 18, .25);
+  transform: translateX(-1px);
+  transition: left 1.1s cubic-bezier(.2, .7, .2, 1);
+  pointer-events: none;
+}
+.meter-cal {
+  flex: 0 0 100%;
+  margin-top: .3rem;
+  font-size: .58rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------- 4. Split-flap chronometer (top strip) ---------- */
+.flap-clock { display: inline-flex; align-items: center; gap: 3px; vertical-align: middle; }
+.flap-tile {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.1ch;
+  padding: .14em .18em;
+  overflow: hidden;
+  background: linear-gradient(180deg, #33241A 0%, #241A12 49%, #17100A 51%, #241A12 100%);
+  color: #F3E3BC;
+  border: 1px solid rgba(23, 16, 10, .8);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 227, .16), inset 0 -1px 2px rgba(0, 0, 0, .6), 0 1px 0 rgba(255, 246, 227, .25);
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+.flap-tile::after {
+  /* the split line across the tile's middle */
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, .7);
+  box-shadow: 0 1px 0 rgba(255, 246, 227, .08);
+}
+body.audit .flap-tile { color: var(--amber); border-color: rgba(255, 176, 0, .35); }
+.flap-colon { color: var(--ink-soft); font-weight: 600; }
+.flap-tile.is-tick { animation: flapTick .18s ease-out; }
+@keyframes flapTick {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+
+/* ---------- 5. Indicator bulbs (glass, not LEDs) ---------- */
+.bulb {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #FFE9A8 0%, var(--amber) 45%, var(--amber-dim) 100%);
+  box-shadow: 0 0 6px 1px rgba(255, 176, 0, .45), inset 0 -1px 1px rgba(90, 50, 0, .55);
+  vertical-align: middle;
+}
+.bulb--strip { margin-left: .3rem; }
+.bulb--prune { margin-left: .55rem; animation: bulbFlicker 4.6s linear infinite; }
+@keyframes bulbFlicker {
+  0%, 100% { opacity: 1; }
+  88% { opacity: 1; }
+  89% { opacity: .55; }
+  90% { opacity: 1; }
+  93% { opacity: .7; }
+  94% { opacity: 1; }
+}
+
+/* ---------- 6. ID card hardware: mag stripe, embossing ---------- */
+.mag-stripe {
+  position: relative;
+  height: 30px;
+  margin: 1.1rem 0 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2E211A 0%, #1D140E 55%, #241A12 100%);
+  border-top: 1px solid rgba(0, 0, 0, .5);
+  border-bottom: 1px solid rgba(255, 246, 227, .18);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 246, 227, .06);
+}
+.mag-scratch {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 246, 227, .28), transparent);
+}
+.mag-scratch--a { top: 8px; left: 6%; width: 34%; transform: rotate(-.6deg); }
+.mag-scratch--b { top: 17px; left: 48%; width: 26%; height: 2px; opacity: .7; transform: rotate(.4deg); }
+.mag-scratch--c { top: 23px; left: 18%; width: 18%; opacity: .55; }
+.emboss {
+  text-shadow: 0 1px 0 rgba(255, 250, 235, .75), 0 -1px 1px rgba(36, 26, 18, .45);
+  letter-spacing: .1em;
+}
+body.audit .emboss {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .6), 0 -1px 1px rgba(255, 201, 92, .35);
+}
+.card-valid {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.card-valid .emboss { font-size: .95rem; }
+
+/* ---------- 7. Monitor field vignette (card zone) ---------- */
+.card-zone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 90% 80% at 50% 42%, transparent 58%, rgba(46, 29, 10, .14) 100%);
+}
+body.audit .card-zone::after {
+  background: radial-gradient(ellipse 90% 80% at 50% 42%, transparent 55%, rgba(0, 0, 0, .42) 100%);
+}
+
+/* ---------- 8. TemPad hardware ---------- */
+.tempad-panel {
+  background: linear-gradient(180deg, #241A12, #17110B);
+  border: 3px solid #3A2A18;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px rgba(255, 176, 0, .16), 0 24px 70px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 233, 168, .14), inset 0 -3px 0 rgba(0, 0, 0, .5);
+}
+.tempad-panel::before {
+  /* machined ridge strip along the bezel's top edge */
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  right: 14px;
+  height: 5px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, rgba(255, 233, 168, .14) 0 3px, transparent 3px 9px);
+  pointer-events: none;
+}
+.tempad-screen {
+  position: relative;
+  border-radius: 6px;
+  padding: clamp(.6rem, 2vw, 1.2rem);
+  background-image: repeating-linear-gradient(0deg, rgba(255, 233, 168, .028) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, .35);
+}
+/* dot-matrix voice: a horizontal double-strike on the amber text */
+.tempad-kicker, .tempad-heading, .tempad-status, .tempad-coord {
+  text-shadow: 1.5px 0 0 rgba(255, 138, 0, .28), -1.5px 0 0 rgba(255, 233, 168, .14);
+}
+.tempad-heading { letter-spacing: .045em; }
+.tempad-destination {
+  border-width: 1.5px;
+  box-shadow: inset 0 1px 0 rgba(255, 233, 168, .09), 0 2px 0 rgba(0, 0, 0, .35);
+}
+/* the door is hardware: a framed housing, brushed heavy panels, screws */
+.time-door {
+  border: 3px solid #2A1A0E;
+  border-radius: 4px;
+  background: #17100A;
+  box-shadow: inset 0 0 0 1px rgba(255, 194, 77, .22), 0 10px 30px rgba(0, 0, 0, .45);
+}
+.door-panel {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 2px, transparent 2px 7px),
+    linear-gradient(90deg, #3A1D0E, #7A3410 56%, #2A150A);
+}
+.door-screw {
+  position: absolute;
+  z-index: 4;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #6B543A, #33241A 70%);
+  box-shadow: inset 0 1px 1px rgba(255, 233, 168, .35), inset 0 -1px 2px rgba(0, 0, 0, .7), 0 1px 1px rgba(0, 0, 0, .5);
+}
+.door-screw::after {
+  content: "";
+  position: absolute;
+  left: 1.5px; right: 1.5px;
+  top: 50%;
+  height: 1.4px;
+  margin-top: -.7px;
+  background: rgba(10, 6, 3, .85);
+  transform: rotate(38deg);
+}
+.door-screw--tl { top: 7px; left: 7px; }
+.door-screw--tr { top: 7px; right: 7px; }
+.door-screw--tr::after { transform: rotate(-24deg); }
+.door-screw--bl { bottom: 7px; left: 7px; }
+.door-screw--bl::after { transform: rotate(71deg); }
+.door-screw--br { bottom: 7px; right: 7px; }
+.door-screw--br::after { transform: rotate(-52deg); }
+
+/* ---------- 9. Generator: tear-off dot-matrix printout ---------- */
+.variant-card::before {
+  /* perforated tear line along the top of the printout */
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  background-image: radial-gradient(circle, var(--page-bg) 2.1px, rgba(36, 26, 18, .3) 2.6px, transparent 3.1px);
+  background-size: 14px 6px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+}
+.variant-fields dd {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: .98rem;
+  letter-spacing: .02em;
+  text-shadow: 1px 0 0 rgba(36, 26, 18, .16);
+}
+.variant-card-foot {
+  letter-spacing: .05em;
+  text-shadow: 1px 0 0 rgba(36, 26, 18, .14);
+}
+
+/* ---------- 10. Worn physical controls ---------- */
+.btn {
+  border-width: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 235, .25), inset 0 -2px 0 rgba(36, 26, 18, .16);
+}
+.btn:hover {
+  box-shadow: 3px 4px 0 rgba(36, 26, 18, .3), inset 0 1px 0 rgba(255, 250, 235, .25);
+}
+.audit-btn { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .22), inset 0 -2px 0 rgba(36, 26, 18, .14); }
+.film-control { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .14), inset 0 -2px 0 rgba(0, 0, 0, .3); }
+.variant-reset { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .22), inset 0 -2px 0 rgba(36, 26, 18, .12); }
+.signal { border-width: 2px; }
+
+/* ---------- V6.6 reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .id-card.is-timeslipping,
+  .id-card.is-timeslipping .photo-window img { animation: none !important; }
+  .flap-tile.is-tick { animation: none; }
+  .bulb--prune { animation: none; }
+  .signal-meter::after { transition: none; }
+  .odo-strip { transition: none; }
+}

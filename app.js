@@ -94,6 +94,9 @@
   const istClock = document.getElementById('istClock');
   const noteDate = document.getElementById('noteDate');
   const liveStatus = document.getElementById('liveStatus');
+  const flapH = document.getElementById('flapH');
+  const flapM = document.getElementById('flapM');
+  const flapS = document.getElementById('flapS');
   let lastStatusHour = -1;
 
   function tickClock() {
@@ -119,6 +122,23 @@
           timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         });
         chronoClock.setAttribute('datetime', now.toISOString());
+        // Split-flap tiles mirror the (screen-reader) time element; the
+        // seconds tile gets a tiny mechanical settle each tick.
+        if (flapH && flapM && flapS) {
+          const parts = chronoClock.textContent.split(':');
+          if (parts.length === 3) {
+            if (flapH.textContent !== parts[0]) flapH.textContent = parts[0];
+            if (flapM.textContent !== parts[1]) flapM.textContent = parts[1];
+            if (flapS.textContent !== parts[2]) {
+              flapS.textContent = parts[2];
+              if (!prefersReducedMotion) {
+                flapS.classList.remove('is-tick');
+                void flapS.offsetWidth;
+                flapS.classList.add('is-tick');
+              }
+            }
+          }
+        }
       }
       if (istClock) {
         istClock.textContent = now.toLocaleTimeString('en-IN', {
@@ -193,7 +213,54 @@
     meter.appendChild(fill);
     dataP.appendChild(meter);
     meterFills[key] = fill;
+    const cal = document.createElement('span');
+    cal.className = 'meter-cal';
+    cal.setAttribute('aria-hidden', 'true');
+    cal.textContent = 'Cal. 1974 · TVA Metrology';
+    dataP.appendChild(cal);
   });
+  /* Odometer drums: each live count is rebuilt as a row of mechanical
+     digit cells (a 0–9 strip behind a recessed window). The strips roll
+     whenever the count changes; the plain printed figure remains the
+     no-JS fallback and the aria-label keeps the value readable. */
+  function renderOdometer(el, n) {
+    const wrap = el.querySelector('.odo-digits');
+    if (!wrap) { el.textContent = Number(n).toLocaleString('en-IN'); return; }
+    const str = String(Math.max(0, Math.round(n)));
+    while (wrap.children.length < str.length) {
+      const cell = document.createElement('span');
+      cell.className = 'odo-cell';
+      const strip = document.createElement('span');
+      strip.className = 'odo-strip';
+      for (let d = 0; d <= 9; d++) {
+        const dg = document.createElement('span');
+        dg.className = 'odo-digit';
+        dg.textContent = String(d);
+        strip.appendChild(dg);
+      }
+      cell.appendChild(strip);
+      wrap.appendChild(cell);
+    }
+    while (wrap.children.length > str.length) wrap.removeChild(wrap.lastChild);
+    for (let i = 0; i < str.length; i++) {
+      const strip = wrap.children[i].firstChild;
+      strip.style.transform = 'translateY(' + (-parseInt(str[i], 10) * 1.06).toFixed(2) + 'em)';
+    }
+  }
+  function buildOdometer(el, n) {
+    el.setAttribute('aria-label', Number(n).toLocaleString('en-IN'));
+    el.textContent = '';
+    const wrap = document.createElement('span');
+    wrap.className = 'odo-digits';
+    wrap.setAttribute('aria-hidden', 'true');
+    el.appendChild(wrap);
+    renderOdometer(el, n);
+  }
+  document.querySelectorAll('[data-live]').forEach((el) => {
+    const key = el.getAttribute('data-live');
+    if (Number.isFinite(liveState[key])) buildOdometer(el, liveState[key]);
+  });
+
   let signalTotalEl = null;
   const signalsList = document.querySelector('.signals');
   if (signalsList) {
@@ -210,6 +277,8 @@
       const n = liveState[key] || 0;
       const pct = Math.max(3, (Math.sqrt(n) / Math.sqrt(max)) * 100);
       meterFills[key].style.transform = 'scaleX(' + (pct / 100).toFixed(3) + ')';
+      const meterEl = meterFills[key].parentElement;
+      if (meterEl) meterEl.style.setProperty('--needle', (pct / 100).toFixed(3));
     });
     if (signalTotalEl) {
       const sum = Object.values(liveState).reduce((a, b) => a + b, 0);
@@ -229,17 +298,27 @@
   refreshMeters(null);
 
   function tweenNumber(el, from, to) {
+    const wrap = el.querySelector('.odo-digits');
     if (prefersReducedMotion || from === to) {
-      el.textContent = Number(to).toLocaleString('en-IN');
+      if (wrap) renderOdometer(el, to);
+      else el.textContent = Number(to).toLocaleString('en-IN');
+      el.setAttribute('aria-label', Number(to).toLocaleString('en-IN'));
       return;
     }
+    if (wrap) wrap.classList.add('is-rolling');
     const start = performance.now();
     const dur = 750;
     (function step(t) {
       const p = Math.min(1, (t - start) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(from + (to - from) * eased).toLocaleString('en-IN');
+      const val = Math.round(from + (to - from) * eased);
+      if (wrap) renderOdometer(el, val);
+      else el.textContent = val.toLocaleString('en-IN');
       if (p < 1) requestAnimationFrame(step);
+      else {
+        if (wrap) wrap.classList.remove('is-rolling');
+        el.setAttribute('aria-label', Number(to).toLocaleString('en-IN'));
+      }
     })(start);
   }
 
@@ -405,6 +484,7 @@
   if (canvas && cardZone) {
     const ctx = canvas.getContext('2d');
     let W = 0, H = 0, threads = [], running = false, rafId = null, heroVisible = false;
+    let branches = [], redlineY = 0, redFlash = null, spawnCount = 0;
     const pointer = { x: -9999, y: -9999 };
 
     function buildField() {
@@ -430,10 +510,123 @@
           nodes
         });
       }
+      branches = [];
+      redFlash = null;
+      redlineY = Math.max(54, H * 0.16);
+    }
+
+    /* Branches: threads that leave the loom field and climb toward the
+       REDLINE. Most think better of it and curl back; the daring ones
+       touch the line, flash, and get pruned back. Population is capped. */
+    const MAX_BRANCHES = 7;
+    function spawnBranch(seeded) {
+      spawnCount += 1;
+      const green = spawnCount % 3 === 2;
+      branches.push({
+        x0: W * (0.06 + Math.random() * 0.88),
+        len: 60 + Math.random() * (H * 0.34),
+        tip: seeded ? 30 + Math.random() * 90 : 6,
+        drift: (Math.random() - 0.5) * 130,
+        sway: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 0.8,
+        curl: 0,
+        state: 'grow',
+        flashT: 0,
+        daring: Math.random() < 0.3,
+        color: green ? '20,69,61' : '232,100,28',
+        colorAudit: green ? '47,143,107' : '255,176,0'
+      });
+    }
+    function updateBranches() {
+      if (!branches.length) {
+        for (let i = 0; i < 4; i++) spawnBranch(true);
+      } else if (branches.length < MAX_BRANCHES && Math.random() < 0.012) {
+        spawnBranch(false);
+      }
+      branches.forEach((br) => {
+        if (br.state === 'grow') {
+          br.tip += br.speed;
+          if (br.tip >= br.len) {
+            br.tip = br.len;
+            if (br.daring) {
+              br.state = 'flash';
+              br.flashT = 0;
+              redFlash = { x: br.x0 + br.drift, t: 0 };
+            } else {
+              br.state = 'curl';
+            }
+          }
+        } else if (br.state === 'curl') {
+          br.curl = Math.min(1, br.curl + 0.03);
+          br.tip -= br.speed * 0.35;
+          if (br.curl >= 1) br.state = 'retract';
+        } else if (br.state === 'flash') {
+          br.flashT += 16;
+          br.tip -= br.speed * 2.4;
+          if (br.flashT > 240) br.state = 'retract';
+        } else {
+          br.tip -= br.speed * 1.7;
+          br.curl = Math.max(0, br.curl - 0.03);
+        }
+      });
+      branches = branches.filter((br) => !(br.state === 'retract' && br.tip <= 5));
+      if (redFlash) {
+        redFlash.t += 16;
+        if (redFlash.t > 320) redFlash = null;
+      }
+    }
+    function drawBranches(inAudit) {
+      branches.forEach((br) => {
+        let col = inAudit ? br.colorAudit : br.color;
+        let alpha = 0.42;
+        if (br.state === 'flash') {
+          col = inAudit ? '255,122,26' : '179,53,43';
+          alpha = 0.85;
+        } else if (br.state === 'grow' && br.tip / br.len > 0.82) {
+          col = '255,150,20';
+          alpha = 0.65;
+        }
+        ctx.beginPath();
+        const steps = 14;
+        for (let i = 0; i <= steps; i++) {
+          const s = i / steps;
+          const x = br.x0 + br.drift * s + Math.sin(s * 2.4 + br.sway) * 7 * s + br.curl * 30 * s * s;
+          const y = redlineY + br.tip * s - br.curl * 34 * s * s;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(' + col + ',' + alpha + ')';
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+        const tx = br.x0 + br.drift + Math.sin(2.4 + br.sway) * 7 + br.curl * 30;
+        const ty = redlineY + br.tip - br.curl * 34;
+        ctx.beginPath();
+        ctx.arc(tx, ty, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + col + ',' + Math.min(1, alpha + 0.2) + ')';
+        ctx.fill();
+      });
+      if (redFlash) {
+        const p = redFlash.t / 320;
+        const fc = inAudit ? '255,122,26' : '179,53,43';
+        const g = ctx.createRadialGradient(redFlash.x, redlineY, 0, redFlash.x, redlineY, 46);
+        g.addColorStop(0, 'rgba(' + fc + ',' + (0.5 * (1 - p)).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(' + fc + ',0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(redFlash.x, redlineY, 46, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     function drawField(t) {
-      ctx.clearRect(0, 0, W, H);
+      // Phosphor afterglow: rather than a hard clear, each frame lays a
+      // translucent destination-out wash over the field, so threads and
+      // branches leave a short fading trail, like an old monitor. No
+      // shadowBlur anywhere; the wash is one fillRect per frame.
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,0.30)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
       const time = t * 0.001;
       // audit mode re-inks the threads amber/green, like the rest of the terminal
       const inAudit = document.body.classList.contains('audit');
@@ -467,6 +660,24 @@
           }
         });
       });
+
+      // REDLINE: the dashed threshold the branches are not to cross,
+      // drawn in the field's current ink (paper red, audit amber).
+      ctx.save();
+      ctx.strokeStyle = inAudit ? 'rgba(255,122,26,0.55)' : 'rgba(179,53,43,0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, redlineY);
+      ctx.lineTo(W, redlineY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = '600 8px "IBM Plex Mono", monospace';
+      ctx.fillStyle = inAudit ? 'rgba(255,176,0,0.8)' : 'rgba(179,53,43,0.75)';
+      ctx.fillText('REDLINE', 8, redlineY - 6);
+      ctx.restore();
+      updateBranches();
+      drawBranches(inAudit);
     }
 
     function loop(t) {
@@ -510,6 +721,57 @@
     addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => { buildField(); if (!running) drawField(0); }, 180);
+    });
+  }
+
+  /* ---------- Timeslipping (the filed photograph is unstable) ----------
+     Activating the photo window — click, tap, Enter/Space, or the S key —
+     slips the whole ID card for ~700ms: stepped displacement jumps with
+     orange/green ghost echoes and a flicker, plus one dry line from the
+     office. Re-entry is guarded; every timer is tracked and cleaned up.
+     Reduced motion: no displacement, just the toast. */
+  const photoWindow = document.getElementById('photoWindow');
+  const slipLines = [
+    'Timeslipping detected. It is not a dance move.',
+    'Variant slipped 0.3 seconds. Barely worth the paperwork.',
+    'Please hold still — the timeline is trying to file you.'
+  ];
+  let slipIndex = 0;
+  let slipping = false;
+  let slipTimers = [];
+
+  function slipLater(fn, delay) {
+    const id = setTimeout(fn, delay);
+    slipTimers.push(id);
+    return id;
+  }
+
+  function endTimeslip() {
+    slipTimers.forEach((id) => clearTimeout(id));
+    slipTimers = [];
+    if (idCard) idCard.classList.remove('is-timeslipping');
+    slipping = false;
+  }
+
+  function startTimeslip() {
+    if (slipping || !idCard) return;
+    showToast(slipLines[slipIndex % slipLines.length]);
+    slipIndex += 1;
+    if (prefersReducedMotion) return;
+    slipping = true;
+    idCard.classList.remove('is-timeslipping');
+    void idCard.offsetWidth;
+    idCard.classList.add('is-timeslipping');
+    slipLater(endTimeslip, 760);
+  }
+
+  if (photoWindow) {
+    photoWindow.addEventListener('click', startTimeslip);
+    photoWindow.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        startTimeslip();
+      }
     });
   }
 
@@ -1029,6 +1291,10 @@
     if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey && !typing && !filmOpen && !tempadOpen) {
       e.preventDefault();
       openTempad();
+    }
+    if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !e.altKey && !typing && !filmOpen && !tempadOpen) {
+      e.preventDefault();
+      startTimeslip();
     }
   });
 
