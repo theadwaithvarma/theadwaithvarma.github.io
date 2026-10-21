@@ -40,16 +40,22 @@
 <body>
   <a class="skip" href="#file-01">Skip to the case file</a>
 
+  <!-- Timeline traversal progress -->
+  <div class="timeline-progress" aria-hidden="true"><span id="timelineBar"></span></div>
+
   <!-- ========== TOP STRIP ========== -->
   <header class="strip">
     <span class="strip-item">Time Variance Authority · Bengaluru Branch Office</span>
     <span class="strip-item strip-clock">Temporal Chronometer · <time id="chronoClock" datetime="">--:--:--</time> IST</span>
+    <span class="strip-item strip-coords" aria-hidden="true">T-Coord <span id="tCoords">— · —</span></span>
     <span class="strip-item strip-motto">For All Time. Always.</span>
+    <button class="audit-btn" id="auditBtn" type="button" aria-pressed="false">Run Temporal Audit</button>
   </header>
 
   <main>
     <!-- ========== THE ID CARD ========== -->
     <section class="card-zone" aria-label="Personnel identification card">
+      <canvas id="timelineCanvas" aria-hidden="true"></canvas>
       <p class="zone-label">Personnel Identification · Present Upon Request · Do Not Prune</p>
 
       <div class="card-scene" id="cardScene">
@@ -104,7 +110,7 @@
                 <div class="field field--wide"><dt>Department</dt><dd>Early Access &amp; Anomalous Arrivals</dd></div>
                 <div class="field field--half"><dt>Timeline of Origin</dt><dd>Earth, the interesting one</dd></div>
                 <div class="field field--half"><dt>Clearance</dt><dd><span class="chip chip--clear">Level 7 — Early Access</span></dd></div>
-                <div class="field field--wide"><dt>Status</dt><dd>Active — arrives before launch (flagged, tolerated) <span class="chip chip--status">Not Pruned</span></dd></div>
+                <div class="field field--wide"><dt>Status</dt><dd>Active — arrives before launch (flagged, tolerated) <span class="chip chip--status">Not Pruned</span><span class="live-status" id="liveStatus">Monitoring in progress</span></dd></div>
               </dl>
               <p class="annotation">“keeps getting in early. recommend monitoring, not pruning.” — the analyst</p>
             </div>
