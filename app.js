@@ -537,8 +537,8 @@
         threads.push({
           baseY, amp: 14 + Math.random() * 26, speed: 0.12 + Math.random() * 0.2,
           phase: Math.random() * Math.PI * 2,
-          color: i % 3 === 2 ? '20,69,61' : '232,100,28',
-          colorAudit: i % 3 === 2 ? '47,143,107' : '255,176,0',
+          color: i % 3 === 2 ? '30,74,56' : '194,94,26',
+          colorAudit: i % 3 === 2 ? '199,127,26' : '255,176,0',
           nodes
         });
       }
@@ -565,8 +565,8 @@
         state: 'grow',
         flashT: 0,
         daring: Math.random() < 0.3,
-        color: green ? '20,69,61' : '232,100,28',
-        colorAudit: green ? '47,143,107' : '255,176,0'
+        color: green ? '30,74,56' : '194,94,26',
+        colorAudit: green ? '199,127,26' : '255,176,0'
       });
     }
     function updateBranches() {
@@ -612,7 +612,7 @@
         let col = inAudit ? br.colorAudit : br.color;
         let alpha = 0.42;
         if (br.state === 'flash') {
-          col = inAudit ? '255,122,26' : '179,53,43';
+          col = inAudit ? '255,122,26' : '166,58,46';
           alpha = 0.85;
         } else if (br.state === 'grow' && br.tip / br.len > 0.82) {
           col = '255,150,20';
@@ -638,7 +638,7 @@
       });
       if (redFlash) {
         const p = redFlash.t / 320;
-        const fc = inAudit ? '255,122,26' : '179,53,43';
+        const fc = inAudit ? '255,122,26' : '166,58,46';
         const g = ctx.createRadialGradient(redFlash.x, redlineY, 0, redFlash.x, redlineY, 46);
         g.addColorStop(0, 'rgba(' + fc + ',' + (0.5 * (1 - p)).toFixed(3) + ')');
         g.addColorStop(1, 'rgba(' + fc + ',0)');
@@ -696,7 +696,7 @@
       // REDLINE: the dashed threshold the branches are not to cross,
       // drawn in the field's current ink (paper red, audit amber).
       ctx.save();
-      ctx.strokeStyle = inAudit ? 'rgba(255,122,26,0.55)' : 'rgba(179,53,43,0.5)';
+      ctx.strokeStyle = inAudit ? 'rgba(255,122,26,0.55)' : 'rgba(166,58,46,0.5)';
       ctx.lineWidth = 1;
       ctx.setLineDash([7, 5]);
       ctx.beginPath();
@@ -705,7 +705,7 @@
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.font = '600 8px "IBM Plex Mono", monospace';
-      ctx.fillStyle = inAudit ? 'rgba(255,176,0,0.8)' : 'rgba(179,53,43,0.75)';
+      ctx.fillStyle = inAudit ? 'rgba(255,176,0,0.8)' : 'rgba(166,58,46,0.75)';
       ctx.fillText('REDLINE', 8, redlineY - 6);
       ctx.restore();
       updateBranches();
@@ -1420,23 +1420,34 @@
       const clearance = 'Level ' + ((hash % 9) + 1);
       const surname = escapeHtml(surnameRaw.toUpperCase());
       const given = escapeHtml(givenRaw.toUpperCase());
+      /* v6.10: the slip is laid out as the actual variant form —
+         name row, ID + time stamp, charge with its CLASS / TYPE
+         columns. Time stamp and type are form fiction struck from
+         the same hash as everything else on the slip. */
+      const nameValue = given !== '—' ? surname + ', ' + given : surname;
+      const timeStamp = String(50000 + (hash % 9999));
+      const variantType = String((hash % 7) + 1);
       variantResult.innerHTML =
         '<article class="variant-card">' +
+          '<p class="variant-code variant-code--tl" aria-hidden="true">INT-KL · Analyst 1130.7</p>' +
+          '<p class="variant-code variant-code--tr" aria-hidden="true">Form TVA-1130-05</p>' +
           '<header class="variant-card-head">' +
             '<span class="variant-mini-seal" aria-hidden="true">TVA</span>' +
             '<span class="variant-card-heading"><span class="variant-card-kicker">Public Intake Copy</span><span class="variant-card-title">Variant Identification</span></span>' +
             '<span class="variant-stamp" aria-hidden="true">Filed</span>' +
           '</header>' +
           '<dl class="variant-fields">' +
-            '<div><dt>Surname</dt><dd>' + surname + '</dd></div>' +
-            '<div><dt>Given Name</dt><dd>' + given + '</dd></div>' +
-            '<div><dt>Variant Nº</dt><dd>' + escapeHtml(variantNo) + '</dd></div>' +
-            '<div><dt>Clearance</dt><dd>' + escapeHtml(clearance) + '</dd></div>' +
+            '<div class="variant-field--wide"><dt>Variant Name</dt><dd>' + nameValue + '</dd></div>' +
+            '<div><dt>Variant ID</dt><dd>' + escapeHtml(variantNo) + '</dd></div>' +
+            '<div><dt>Time Stamp</dt><dd>' + timeStamp + '</dd></div>' +
+            '<div class="variant-field--wide"><dt>Charge</dt><dd>' + escapeHtml(offense) + '</dd></div>' +
+            '<div><dt>Class</dt><dd>' + escapeHtml(clearance) + '</dd></div>' +
+            '<div><dt>Type</dt><dd>' + variantType + '</dd></div>' +
             '<div class="variant-field--wide"><dt>Department</dt><dd>' + escapeHtml(department) + '</dd></div>' +
-            '<div class="variant-field--wide"><dt>Status</dt><dd>' + escapeHtml(offense) + '</dd></div>' +
           '</dl>' +
           '<p class="variant-card-foot">Intake Nº ' + escapeHtml(variantNo) + ' · Kerala Branch · Forgotten on departure</p>' +
           '<button class="variant-reset" type="button" data-reset-variant>File another</button>' +
+          '<p class="variant-code variant-code--br" aria-hidden="true">ABV-KL/STR1130 · ' + escapeHtml(variantNo) + '</p>' +
         '</article>';
     });
 

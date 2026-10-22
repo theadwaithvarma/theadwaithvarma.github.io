@@ -4,22 +4,26 @@
    ============================================================ */
 
 :root {
-  --page-bg: #EBDCBA;
-  --card: #F0E2C4;
-  --card-deep: #E6D2A6;
+  /* v6.10 palette (audit-corrected): aged sheet on a deeper desk,
+     rust instead of safety orange, one honest deep green. Roles are
+     unchanged from v6.9 — only the values moved. See DESIGN.md. */
+  --page-bg: #E2CFA6;
+  --card: #EBDCBA;
+  --card-deep: #DFC99E;
   --ink: #241A12;
   --ink-soft: #5A4632;
-  --ink-faint: #86735A;
-  --orange: #E8641C;
-  --orange-deep: #D95D1E;
-  --stamp-red: #B3352B;
-  --teal: #14453D;
+  --ink-faint: #7A6547;
+  --orange: #C25E1A;
+  --orange-deep: #A84E14;
+  --stamp-red: #A63A2E;
+  --green: #1E4A38;
   --amber: #FFB000;
   --amber-dim: #C77F1A;
   --wood: #6E4520;
   --wood-deep: #4A2E15;
   --ochre: #D9A441;
-  --green: #14453D;
+  --brass: #8A6420;
+  --brass-hi: #DEC27C;
   --rule: rgba(36, 26, 18, 0.28);
   --rule-soft: rgba(36, 26, 18, 0.14);
 
@@ -319,11 +323,18 @@ html.js .reveal.is-visible { opacity: 1; transform: none; }
 }
 .field dd {
   margin: 0;
-  font-weight: 600;
-  font-size: clamp(.95rem, 2vw, 1.08rem);
+  /* v6.10 form language: values are typed onto the form, like the
+     L1130 file — typewriter serif on the rule, not grotesque UI text */
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: clamp(1rem, 2.1vw, 1.14rem);
   line-height: 1.35;
+  letter-spacing: .01em;
 }
 .field dd.dd-name {
+  /* the name keeps the card's display grotesque: it is lettered,
+     not typed — the one deliberate exception in the data block */
+  font-family: var(--font-grotesque);
   font-size: clamp(1.3rem, 3vw, 1.7rem);
   font-weight: 800;
   text-transform: uppercase;
@@ -341,7 +352,7 @@ html.js .reveal.is-visible { opacity: 1; transform: none; }
   vertical-align: baseline;
   white-space: nowrap;
 }
-.chip--clear { background: var(--teal); color: var(--card); }
+.chip--clear { background: var(--green); color: var(--card); }
 .chip--status {
   color: var(--stamp-red);
   border: 1.5px solid var(--stamp-red);
@@ -361,10 +372,13 @@ html.js .reveal.is-visible { opacity: 1; transform: none; }
   margin: 1.15rem 0 0;
 }
 
-/* --- teal band + card footer --- */
-.card-teal {
+/* --- clearance band + card footer ---
+   (v6.10: was .card-teal, the card's one band of colour. Under the
+   corrected palette it is deliberately the deep green — the same
+   green as the clearance chip — and renamed to say what it is.) */
+.card-clearance {
   margin-top: 1.4rem;
-  background: var(--teal);
+  background: var(--green);
   color: var(--card);
   font-family: var(--font-mono);
   font-size: .66rem;
@@ -417,21 +431,23 @@ html.js .reveal.is-visible { opacity: 1; transform: none; }
   z-index: 5;
   text-align: center;
   color: var(--stamp-red);
-  border: 3.5px double var(--stamp-red);
+  /* v6.10 APPREHENDED spec: a proper double rule, not a fat line */
+  border: 4px double var(--stamp-red);
   border-radius: 5px;
   padding: .55rem .95rem .5rem;
   transform: rotate(-12deg);
   mix-blend-mode: multiply;
   opacity: .94;
   pointer-events: none;
-  background: rgba(179, 53, 43, .04);
+  background: rgba(166, 58, 46, .04);
 }
 .stamp-main {
   display: block;
   font-family: var(--font-type);
   font-size: clamp(1.15rem, 3.2vw, 1.6rem);
   line-height: 1.12;
-  letter-spacing: .06em;
+  /* v6.10: letterspaced like the prop's stamp die */
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 .stamp-sub {
@@ -933,7 +949,9 @@ html.js .file.reveal.is-visible { transform: rotate(0); }
 .timeline-progress span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--orange));
+  /* v6.10: solid amber-dim — the TVA never blends hues (was a
+     teal→orange data-viz gradient; the v6.9 override below agrees) */
+  background: var(--amber-dim);
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -979,7 +997,7 @@ body.audit .card-zone::before {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
-  color: var(--teal);
+  color: var(--green);
 }
 .live-status::before {
   content: "";
@@ -1007,7 +1025,7 @@ body.audit .card-zone::before {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--stamp-red);
-  border: 2px solid var(--stamp-red);
+  border: 3px double var(--stamp-red);
   border-radius: 4px;
   padding: 0.3rem 0.6rem;
   opacity: 0;
@@ -1045,7 +1063,9 @@ main.is-nudged { animation: stampNudge 0.12s ease-out; }
   display: block;
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--orange));
+  /* v6.10: solid rust — was the teal→orange gradient, the single
+     most "dashboard widget" gesture on the page */
+  background: var(--orange);
   border-radius: 3px;
   transform: scaleX(0);
   transform-origin: left center;
@@ -1054,8 +1074,8 @@ main.is-nudged { animation: stampNudge 0.12s ease-out; }
 .signal--featured .signal-fill { background: var(--orange); }
 .signal.is-updated { animation: signalPulse 1.2s ease; }
 @keyframes signalPulse {
-  0% { box-shadow: 0 0 0 0 rgba(232, 100, 28, 0.45); }
-  100% { box-shadow: 0 0 0 14px rgba(232, 100, 28, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(194, 94, 26, 0.45); }
+  100% { box-shadow: 0 0 0 14px rgba(194, 94, 26, 0); }
 }
 /* Strip extras */
 .strip-coords { font-family: var(--font-mono); }
@@ -1098,11 +1118,13 @@ body.audit {
   --orange: #FFB000;
   --orange-deep: #FF9E2C;
   --stamp-red: #FF7A1A;
-  --teal: #2F8F6B;
+  /* audit is amber monochrome, no exceptions: the green role
+     collapses into amber-dim (v6.10) */
+  --green: #C77F1A;
   --rule: rgba(255, 201, 92, 0.30);
   --rule-soft: rgba(255, 201, 92, 0.15);
-  --shadow-card: 0 0 0 1px rgba(255, 176, 0, 0.25), 0 18px 44px -12px rgba(0, 0, 0, 0.8);
-  --shadow-doc: 5px 6px 0 rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 0 0 1px rgba(255, 176, 0, 0.25), 0 18px 44px -12px rgba(23, 14, 7, 0.8);
+  --shadow-doc: 5px 6px 0 rgba(23, 14, 7, 0.5);
   /* the clock motif stays, re-struck in amber */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23FFB000' stroke-opacity='0.05' stroke-width='1.4'%3E%3Ccircle cx='36' cy='36' r='10'/%3E%3Cpath d='M36 27v3M36 42v3M27 36h3M42 36h3'/%3E%3C/g%3E%3Ccircle cx='6' cy='6' r='1.2' fill='%23FFB000' fill-opacity='0.045'/%3E%3C/svg%3E");
 }
@@ -1230,7 +1252,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   left: 0; right: 0;
   height: 34%;
   top: -40%;
-  background: linear-gradient(180deg, transparent, rgba(232, 100, 28, 0.20), rgba(232, 100, 28, 0.38), rgba(232, 100, 28, 0.20), transparent);
+  background: linear-gradient(180deg, transparent, rgba(194, 94, 26, 0.20), rgba(194, 94, 26, 0.38), rgba(194, 94, 26, 0.20), transparent);
   animation: photoScan 7s ease-in-out infinite;
   pointer-events: none;
 }
@@ -1276,7 +1298,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
 .prune-panel {
   width: min(680px, 100%);
   border: 1.5px solid var(--stamp-red);
-  background: rgba(179, 53, 43, 0.055);
+  background: rgba(166, 58, 46, 0.055);
   box-shadow: 4px 5px 0 rgba(34, 26, 20, 0.14);
   /* the nameplate is a structural header bar now: the panel carries no
      top/side padding for it to bleed into, so no negative margins */
@@ -1288,10 +1310,10 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   margin: 0 0 1rem;
   padding: 0.6rem 1rem;
   background: linear-gradient(180deg, #5D3A1A, var(--wood-deep));
-  box-shadow: inset 0 1px 0 rgba(255, 226, 170, 0.28), inset 0 -2px 0 rgba(0, 0, 0, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 226, 170, 0.28), inset 0 -2px 0 rgba(23, 14, 7, 0.38);
   font-family: var(--font-type);
   color: #F3E7CB;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
+  text-shadow: 0 -1px 0 rgba(23, 14, 7, 0.45);
   font-size: 0.82rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1359,7 +1381,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   background: #17120E;
   color: #F1E7D0;
   border: 2px solid #050403;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(241, 231, 208, 0.16);
+  box-shadow: 0 30px 80px rgba(23, 14, 7, 0.55), 0 0 0 1px rgba(241, 231, 208, 0.16);
   padding: clamp(0.9rem, 2.5vw, 1.4rem);
   transform: translateY(12px) scale(0.985);
   transition: transform var(--dur-2) var(--ease-paper);
@@ -1385,7 +1407,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   isolation: isolate;
   background: radial-gradient(ellipse at center, #272018 0%, #171310 52%, #090706 100%);
   border: 6px solid #050403;
-  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.88);
+  box-shadow: inset 0 0 90px rgba(23, 14, 7, 0.88);
 }
 .film-screen::before,
 .film-screen::after {
@@ -1473,7 +1495,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(232, 100, 28, 0.58), transparent 24%);
+  background: conic-gradient(from 0deg, rgba(194, 94, 26, 0.58), transparent 24%);
   animation: leaderSweep 2.1s linear infinite;
 }
 .leader-count { position: relative; z-index: 1; }
@@ -1586,7 +1608,7 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
 
 /* ---------- TemPad ---------- */
 .tempad-overlay {
-  background: radial-gradient(circle at center, rgba(232, 100, 28, 0.14), transparent 34%), rgba(3, 5, 4, 0.91);
+  background: radial-gradient(circle at center, rgba(194, 94, 26, 0.14), transparent 34%), rgba(3, 5, 4, 0.91);
 }
 .tempad-panel {
   position: relative;
@@ -1733,8 +1755,8 @@ html.js .card-scene.is-dealt .fields .field:nth-child(9) { animation-delay: 0.55
   z-index: 108;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(ellipse at center, transparent 42%, rgba(179, 53, 43, 0.28) 100%);
-  box-shadow: inset 0 0 0 4px rgba(179, 53, 43, 0.65), inset 0 0 90px rgba(179, 53, 43, 0.55);
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(166, 58, 46, 0.28) 100%);
+  box-shadow: inset 0 0 0 4px rgba(166, 58, 46, 0.65), inset 0 0 90px rgba(166, 58, 46, 0.55);
   transition: opacity 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 #pruneVeil.is-active { opacity: 1; }
@@ -1750,7 +1772,7 @@ body.is-pruning .loom-tape {
 }
 @keyframes pruneAlarm {
   from { filter: brightness(1); }
-  to { filter: brightness(1.35) saturate(1.5); box-shadow: inset 0 0 0 999px rgba(179, 53, 43, 0.16); }
+  to { filter: brightness(1.35) saturate(1.5); box-shadow: inset 0 0 0 999px rgba(166, 58, 46, 0.16); }
 }
 
 /* Prune stage: fixed choreography layer (HUD, front, thread, stamps).
@@ -1768,7 +1790,7 @@ body.is-pruning .loom-tape {
   background: #17120E;
   color: var(--amber);
   border: 1.5px solid rgba(255, 176, 0, 0.55);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 24px rgba(255, 176, 0, 0.07);
+  box-shadow: 0 10px 30px rgba(23, 14, 7, 0.45), inset 0 0 24px rgba(255, 176, 0, 0.07);
   font-family: var(--font-mono);
   text-align: center;
   pointer-events: none;
@@ -1827,7 +1849,7 @@ body.is-pruning .loom-tape {
   z-index: 117;
   pointer-events: none;
   background: linear-gradient(90deg, transparent, var(--orange) 18%, var(--amber) 50%, var(--orange) 82%, transparent);
-  box-shadow: 0 0 18px 4px rgba(232, 100, 28, 0.55), 0 2px 30px rgba(255, 138, 0, 0.35);
+  box-shadow: 0 0 18px 4px rgba(194, 94, 26, 0.55), 0 2px 30px rgba(255, 138, 0, 0.35);
   opacity: 0;
   transform: translateY(102vh);
 }
@@ -2129,7 +2151,8 @@ body.is-terminated .prune-thread::before {
   right: -0.55rem;
   font-family: var(--font-type);
   color: var(--stamp-red);
-  border: 2.5px solid var(--stamp-red);
+  /* v6.10 APPREHENDED spec: double rule, like every other stamp */
+  border: 3px double var(--stamp-red);
   border-radius: 4px;
   padding: 0.35rem 0.7rem;
   letter-spacing: 0.14em;
@@ -2160,8 +2183,10 @@ body.is-terminated .prune-thread::before {
 }
 .variant-fields dd {
   margin: 0.22rem 0 0;
-  font-family: var(--font-grotesque);
-  font-weight: 700;
+  /* v6.10: the intake slip is a variant form — its values are typed */
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: 1.02rem;
   overflow-wrap: anywhere;
 }
 .variant-field--wide { grid-column: 1 / -1; }
@@ -2312,7 +2337,7 @@ body.is-terminated .prune-thread::before {
 
 /* ---------- 1. Timeslipping ---------- */
 .id-card {
-  --slip-echo-a: rgba(232, 100, 28, 0.45);
+  --slip-echo-a: rgba(194, 94, 26, 0.45);
   --slip-echo-b: rgba(20, 69, 61, 0.42);
 }
 body.audit .id-card {
@@ -2321,7 +2346,7 @@ body.audit .id-card {
 }
 .photo-window { cursor: pointer; }
 .photo-window:hover {
-  box-shadow: inset 0 0 0 1px rgba(239, 230, 208, .25), 0 0 0 2px rgba(232, 100, 28, .35);
+  box-shadow: inset 0 0 0 1px rgba(239, 230, 208, .25), 0 0 0 2px rgba(194, 94, 26, .35);
 }
 /* V6.7: the slip is elastic, not a shake. The transform track below
    squashes in anticipation, stretches like taffy at the peak, then
@@ -2396,7 +2421,7 @@ body.audit .id-card {
   overflow: hidden;
   border-radius: 2px;
   background: linear-gradient(180deg, #171008 0%, #2A1D10 46%, #120C06 54%, #241A10 100%);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .75), inset 0 -1px 0 rgba(255, 246, 227, .14), 0 1px 0 rgba(255, 246, 227, .35);
+  box-shadow: inset 0 1px 2px rgba(23, 14, 7, .75), inset 0 -1px 0 rgba(255, 246, 227, .14), 0 1px 0 rgba(255, 246, 227, .35);
 }
 .odo-cell::after {
   content: "";
@@ -2404,7 +2429,7 @@ body.audit .id-card {
   left: 0; right: 0;
   top: 50%;
   height: 1px;
-  background: rgba(0, 0, 0, .65);
+  background: rgba(23, 14, 7, .65);
   box-shadow: 0 1px 0 rgba(255, 246, 227, .10);
 }
 .odo-strip {
@@ -2484,7 +2509,7 @@ body.audit .odo-digit { color: #FFC95C; }
   color: #F3E3BC;
   border: 1px solid rgba(23, 16, 10, .8);
   border-radius: 2px;
-  box-shadow: inset 0 1px 0 rgba(255, 246, 227, .16), inset 0 -1px 2px rgba(0, 0, 0, .6), 0 1px 0 rgba(255, 246, 227, .25);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 227, .16), inset 0 -1px 2px rgba(23, 14, 7, .6), 0 1px 0 rgba(255, 246, 227, .25);
   font-weight: 600;
   letter-spacing: .06em;
 }
@@ -2495,7 +2520,7 @@ body.audit .odo-digit { color: #FFC95C; }
   left: 0; right: 0;
   top: 50%;
   height: 1px;
-  background: rgba(0, 0, 0, .7);
+  background: rgba(23, 14, 7, .7);
   box-shadow: 0 1px 0 rgba(255, 246, 227, .08);
 }
 body.audit .flap-tile { color: var(--amber); border-color: rgba(255, 176, 0, .35); }
@@ -2528,31 +2553,17 @@ body.audit .flap-tile { color: var(--amber); border-color: rgba(255, 176, 0, .35
   94% { opacity: 1; }
 }
 
-/* ---------- 6. ID card hardware: mag stripe, embossing ---------- */
-.mag-stripe {
-  position: relative;
-  height: 30px;
-  margin: 1.1rem 0 0;
-  overflow: hidden;
-  background: linear-gradient(180deg, #2E211A 0%, #1D140E 55%, #241A12 100%);
-  border-top: 1px solid rgba(0, 0, 0, .5);
-  border-bottom: 1px solid rgba(255, 246, 227, .18);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 246, 227, .06);
-}
-.mag-scratch {
-  position: absolute;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 246, 227, .28), transparent);
-}
-.mag-scratch--a { top: 8px; left: 6%; width: 34%; transform: rotate(-.6deg); }
-.mag-scratch--b { top: 17px; left: 48%; width: 26%; height: 2px; opacity: .7; transform: rotate(.4deg); }
-.mag-scratch--c { top: 23px; left: 18%; width: 18%; opacity: .55; }
+/* ---------- 6. ID card hardware: embossing ----------
+   (v6.10: the mag stripe is GONE. It was the one element with no
+   analogue on the L1130 paper file — pure payment-card hardware —
+   and the prop wins. The embossed Card Nº / Valid Thru stay: on
+   the file they read as stamped form data, not card furniture.) */
 .emboss {
   text-shadow: 0 1px 0 rgba(255, 250, 235, .75), 0 -1px 1px rgba(36, 26, 18, .45);
   letter-spacing: .1em;
 }
 body.audit .emboss {
-  text-shadow: 0 1px 0 rgba(0, 0, 0, .6), 0 -1px 1px rgba(255, 201, 92, .35);
+  text-shadow: 0 1px 0 rgba(23, 14, 7, .6), 0 -1px 1px rgba(255, 201, 92, .35);
 }
 .card-valid {
   margin: 0;
@@ -2574,7 +2585,7 @@ body.audit .emboss {
   background: radial-gradient(ellipse 90% 80% at 50% 42%, transparent 58%, rgba(46, 29, 10, .14) 100%);
 }
 body.audit .card-zone::after {
-  background: radial-gradient(ellipse 90% 80% at 50% 42%, transparent 55%, rgba(0, 0, 0, .42) 100%);
+  background: radial-gradient(ellipse 90% 80% at 50% 42%, transparent 55%, rgba(23, 14, 7, .42) 100%);
 }
 
 /* ---------- 8. TemPad hardware ---------- */
@@ -2582,7 +2593,7 @@ body.audit .card-zone::after {
   background: linear-gradient(180deg, #241A12, #17110B);
   border: 3px solid #3A2A18;
   border-radius: 14px;
-  box-shadow: 0 0 0 2px rgba(255, 176, 0, .16), 0 24px 70px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 233, 168, .14), inset 0 -3px 0 rgba(0, 0, 0, .5);
+  box-shadow: 0 0 0 2px rgba(255, 176, 0, .16), 0 24px 70px rgba(23, 14, 7, .6), inset 0 1px 0 rgba(255, 233, 168, .14), inset 0 -3px 0 rgba(23, 14, 7, .5);
 }
 .tempad-panel::before {
   /* machined ridge strip along the bezel's top edge */
@@ -2601,7 +2612,7 @@ body.audit .card-zone::after {
   border-radius: 6px;
   padding: clamp(.6rem, 2vw, 1.2rem);
   background-image: repeating-linear-gradient(0deg, rgba(255, 233, 168, .028) 0 1px, transparent 1px 3px);
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, .35);
+  box-shadow: inset 0 0 60px rgba(23, 14, 7, .35);
 }
 /* dot-matrix voice: a horizontal double-strike on the amber text */
 .tempad-kicker, .tempad-heading, .tempad-status, .tempad-coord {
@@ -2610,18 +2621,18 @@ body.audit .card-zone::after {
 .tempad-heading { letter-spacing: .045em; }
 .tempad-destination {
   border-width: 1.5px;
-  box-shadow: inset 0 1px 0 rgba(255, 233, 168, .09), 0 2px 0 rgba(0, 0, 0, .35);
+  box-shadow: inset 0 1px 0 rgba(255, 233, 168, .09), 0 2px 0 rgba(23, 14, 7, .35);
 }
 /* the door is hardware: a framed housing, brushed heavy panels, screws */
 .time-door {
   border: 3px solid #2A1A0E;
   border-radius: 4px;
   background: #17100A;
-  box-shadow: inset 0 0 0 1px rgba(255, 194, 77, .22), 0 10px 30px rgba(0, 0, 0, .45);
+  box-shadow: inset 0 0 0 1px rgba(255, 194, 77, .22), 0 10px 30px rgba(23, 14, 7, .45);
 }
 .door-panel {
   background-image:
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(0deg, rgba(23, 14, 7, .16) 0 2px, transparent 2px 7px),
     linear-gradient(90deg, #3A1D0E, #7A3410 56%, #2A150A);
 }
 .door-screw {
@@ -2631,7 +2642,7 @@ body.audit .card-zone::after {
   height: 10px;
   border-radius: 50%;
   background: radial-gradient(circle at 36% 32%, #6B543A, #33241A 70%);
-  box-shadow: inset 0 1px 1px rgba(255, 233, 168, .35), inset 0 -1px 2px rgba(0, 0, 0, .7), 0 1px 1px rgba(0, 0, 0, .5);
+  box-shadow: inset 0 1px 1px rgba(255, 233, 168, .35), inset 0 -1px 2px rgba(23, 14, 7, .7), 0 1px 1px rgba(23, 14, 7, .5);
 }
 .door-screw::after {
   content: "";
@@ -2686,7 +2697,7 @@ body.audit .card-zone::after {
   box-shadow: 3px 4px 0 rgba(36, 26, 18, .3), inset 0 1px 0 rgba(255, 250, 235, .25);
 }
 .audit-btn { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .22), inset 0 -2px 0 rgba(36, 26, 18, .14); }
-.film-control { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .14), inset 0 -2px 0 rgba(0, 0, 0, .3); }
+.film-control { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .14), inset 0 -2px 0 rgba(23, 14, 7, .3); }
 .variant-reset { box-shadow: inset 0 1px 0 rgba(255, 250, 235, .22), inset 0 -2px 0 rgba(36, 26, 18, .12); }
 .signal { border-width: 2px; }
 
@@ -2714,15 +2725,15 @@ body.audit .card-zone::after {
 /* ---------- TemPad: a brass-framed slab ---------- */
 .tempad-panel {
   background:
-    linear-gradient(165deg, rgba(217, 164, 65, .20), rgba(74, 46, 21, .05) 42%, rgba(0, 0, 0, .28)),
+    linear-gradient(165deg, rgba(217, 164, 65, .20), rgba(74, 46, 21, .05) 42%, rgba(23, 14, 7, .28)),
     linear-gradient(180deg, #2B1C0E, #190F07);
-  border: 3px solid #8A6420;
+  border: 3px solid var(--brass);
   box-shadow:
     0 0 0 1.5px #38260A,
     0 0 0 4px rgba(217, 164, 65, .32),
-    0 26px 70px rgba(0, 0, 0, .65),
+    0 26px 70px rgba(23, 14, 7, .65),
     inset 0 1px 0 rgba(255, 233, 168, .38),
-    inset 0 -4px 0 rgba(0, 0, 0, .55);
+    inset 0 -4px 0 rgba(23, 14, 7, .55);
 }
 .tempad-panel::before {
   /* the bezel's machined ridge, re-struck in brass */
@@ -2735,12 +2746,12 @@ body.audit .card-zone::after {
   inset: 11px;
   border: 1px solid rgba(217, 164, 65, .26);
   border-radius: 9px;
-  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .45);
+  box-shadow: inset 0 1px 0 rgba(23, 14, 7, .45);
   pointer-events: none;
 }
 .tempad-screen {
   background-color: rgba(24, 14, 4, .72);
-  box-shadow: inset 0 0 70px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 176, 0, .10);
+  box-shadow: inset 0 0 70px rgba(23, 14, 7, .5), inset 0 1px 0 rgba(255, 176, 0, .10);
 }
 
 /* destination keys: chunky raised squares with an amber backlight */
@@ -2750,9 +2761,9 @@ body.audit .card-zone::after {
   background: linear-gradient(180deg, #4C3216 0%, #33200F 55%, #261605 100%);
   box-shadow:
     0 5px 0 #140B03,
-    0 8px 14px rgba(0, 0, 0, .5),
+    0 8px 14px rgba(23, 14, 7, .5),
     inset 0 1px 0 rgba(255, 233, 168, .38),
-    inset 0 -2px 0 rgba(0, 0, 0, .5);
+    inset 0 -2px 0 rgba(23, 14, 7, .5);
 }
 .tempad-destination:hover,
 .tempad-destination:focus-visible {
@@ -2761,10 +2772,10 @@ body.audit .card-zone::after {
   background: linear-gradient(180deg, #5D3D19 0%, #3E2810 55%, #2E1C07 100%);
   box-shadow:
     0 6px 0 #140B03,
-    0 9px 16px rgba(0, 0, 0, .5),
+    0 9px 16px rgba(23, 14, 7, .5),
     0 0 20px rgba(255, 176, 0, .38),
     inset 0 1px 0 rgba(255, 233, 168, .5),
-    inset 0 -2px 0 rgba(0, 0, 0, .5);
+    inset 0 -2px 0 rgba(23, 14, 7, .5);
 }
 .tempad-destination:active {
   transform: translateY(3px);
@@ -2772,10 +2783,10 @@ body.audit .card-zone::after {
   background: linear-gradient(180deg, #68451C 0%, #473013 55%, #33200B 100%);
   box-shadow:
     0 2px 0 #140B03,
-    0 4px 8px rgba(0, 0, 0, .5),
+    0 4px 8px rgba(23, 14, 7, .5),
     0 0 30px rgba(255, 176, 0, .60),
     inset 0 1px 0 rgba(255, 233, 168, .55),
-    inset 0 -1px 0 rgba(0, 0, 0, .5);
+    inset 0 -1px 0 rgba(23, 14, 7, .5);
 }
 
 /* ---------- Chronometer: walnut housing, brass screws ---------- */
@@ -2785,15 +2796,15 @@ body.audit .card-zone::after {
   border-radius: 4px;
   background-color: #3E2812;
   background-image:
-    radial-gradient(circle at 6px 6px, #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
-    radial-gradient(circle at calc(100% - 6px) 6px, #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
-    radial-gradient(circle at 6px calc(100% - 6px), #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
-    radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #EBCB7E 0 1.2px, #77591C 1.8px, rgba(0, 0, 0, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at 6px 6px, var(--brass-hi) 0 1.2px, #77591C 1.8px, rgba(23, 14, 7, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at calc(100% - 6px) 6px, var(--brass-hi) 0 1.2px, #77591C 1.8px, rgba(23, 14, 7, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at 6px calc(100% - 6px), var(--brass-hi) 0 1.2px, #77591C 1.8px, rgba(23, 14, 7, .4) 2.2px, transparent 2.8px),
+    radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), var(--brass-hi) 0 1.2px, #77591C 1.8px, rgba(23, 14, 7, .4) 2.2px, transparent 2.8px),
     linear-gradient(180deg, #5D3E22 0%, #402A13 58%, #2E1D0C 100%);
   background-repeat: no-repeat;
   box-shadow:
     inset 0 1px 0 rgba(255, 233, 168, .30),
-    inset 0 -2px 3px rgba(0, 0, 0, .55),
+    inset 0 -2px 3px rgba(23, 14, 7, .55),
     0 1px 2px rgba(36, 26, 18, .35);
 }
 
@@ -2817,14 +2828,14 @@ body:not(.audit) .signal {
 .signal--featured::before {
   top: 5px;
   background-image:
-    radial-gradient(circle at 15px 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
-    radial-gradient(circle at calc(100% - 9px) 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
+    radial-gradient(circle at 15px 4px, var(--brass-hi) 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 9px) 4px, var(--brass-hi) 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
 }
 .signal--featured::after {
   bottom: 5px;
   background-image:
-    radial-gradient(circle at 15px 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
-    radial-gradient(circle at calc(100% - 9px) 4px, #E3B95C 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
+    radial-gradient(circle at 15px 4px, var(--brass-hi) 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 9px) 4px, var(--brass-hi) 0 1.6px, #7A5A18 2.3px, rgba(36, 26, 18, .35) 2.8px, transparent 3.4px);
 }
 
 /* ---------- Buttons: squarer, with an amber indicator notch ---------- */
@@ -2882,8 +2893,9 @@ html.js .strip > *:nth-child(6) { animation-delay: 300ms; }
   background: rgba(36, 26, 18, .08);
 }
 .timeline-progress span {
-  /* solid amber, no more teal gradient: it is the sacred thread */
-  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  /* solid amber-dim, no gradient of any kind: it is the sacred
+     thread, and the glowing node at its edge does the hot work */
+  background: var(--amber-dim);
 }
 .timeline-progress::after {
   /* the node rides the leading edge; positioned from the same --p
@@ -2925,7 +2937,9 @@ html.js .strip > *:nth-child(6) { animation-delay: 300ms; }
    the tabs are withdrawn too (pure CSS on the prune's own body
    classes — the prune machine itself is untouched) */
 body.is-pruning .file-tabs,
-body.is-terminated .file-tabs {
+body.is-terminated .file-tabs,
+body.is-pruning .tva-monogram,
+body.is-terminated .tva-monogram {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -3034,4 +3048,138 @@ html.js #file-02:not(.is-visible) .signal { opacity: 0; transform: translateY(10
   html.js #file-02:not(.is-visible) .signal { opacity: 1; transform: none; }
   /* state changes still read, they just don't travel */
   .file-tab::after, .to-top { transition: none; }
+}
+
+/* ============================================================
+   V6.10 — PROP ACCURACY + PALETTE CORRECTION
+   The palette half is token work above (see :root). This section
+   is the prop half: the L1130 paper file, not the payment card.
+   Form rows, corner codes, a mugshot ruler, an honest stamp, the
+   monogram. Nothing here moves that didn't already move.
+   ============================================================ */
+
+:root {
+  /* stamp ink distress: one tile of fractal noise, alpha remapped
+     so the ink stays mostly solid and breaks at the blotches. Used
+     as a mask — texture, not a filter over content. */
+  --stamp-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.55 0.55 0.55 0 0.5'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- The stamp, re-cut ----------
+   Every rubber stamp on the page gets the APPREHENDED treatment:
+   the double rule (done in each stamp's own rule above) plus ink
+   that has been struck ten thousand times. The mask is static;
+   slam timings and prune choreography are untouched. */
+.stamp, .prune-stamp, .variant-stamp, .date-stamp, .file::after {
+  -webkit-mask-image: var(--stamp-noise);
+  mask-image: var(--stamp-noise);
+  -webkit-mask-size: 260px 260px;
+  mask-size: 260px 260px;
+}
+
+/* ---------- Corner codes ----------
+   Bureaucratic microdata in the prop's positions, none of it
+   explained. Quiet by design: the faintest ink on the sheet. */
+.card-code {
+  position: absolute;
+  top: .55rem;
+  margin: 0;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+.card-code--tl { left: clamp(1.9rem, 4.5vw, 3rem); }
+.card-code--tr { right: clamp(1.2rem, 3.4vw, 2.4rem); }
+@media (max-width: 640px) {
+  .card-code--tl { left: 1.15rem; }
+  .card-code--tr { right: 1.15rem; }
+}
+.colophon .colophon-code {
+  text-align: right;
+  font-size: .62rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------- The mugshot ruler ----------
+   The prop's photo sits on a height board. Here the board is a
+   strip inside the photo window, beside the photograph — ticks
+   and foot marks, muted, never over the face. */
+.photo-window { display: flex; gap: 8px; align-items: stretch; }
+.photo-window img { flex: 1 1 auto; min-width: 0; }
+.height-ruler {
+  position: relative;
+  flex: none;
+  width: 30px;
+  background-color: var(--card-deep);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(36, 26, 18, .55) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgba(36, 26, 18, .35) 0 1px, transparent 1px 8px);
+  background-size: 58% 100%, 34% 100%;
+  background-position: left top;
+  box-shadow: inset 0 0 0 1px rgba(36, 26, 18, .18);
+}
+.height-ruler span {
+  position: absolute;
+  right: 3px;
+  font-family: var(--font-mono);
+  font-size: .52rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+.height-ruler span:nth-child(1) { top: 6%; }
+.height-ruler span:nth-child(2) { top: 40%; }
+.height-ruler span:nth-child(3) { top: 74%; }
+body.audit .height-ruler {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 201, 92, .5) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgba(255, 201, 92, .35) 0 1px, transparent 1px 8px);
+  box-shadow: inset 0 0 0 1px rgba(255, 201, 92, .2);
+}
+
+/* ---------- The monogram ----------
+   The prop ends with the big geometric TVA mark, grey, treated
+   as a layout element. Original block letterforms (SVG below in
+   index.html) in the file's own ink at low strength. Withdrawn
+   with the tabs when the file is pruned (rule in the v6.9 block). */
+.tva-monogram {
+  margin: clamp(.4rem, 2vw, 1rem) auto 0;
+  text-align: center;
+  transition: opacity var(--dur-1) ease, visibility var(--dur-1);
+}
+.tva-monogram svg {
+  display: inline-block;
+  width: min(400px, 74%);
+  height: auto;
+  fill: var(--ink);
+  opacity: .3;
+}
+
+/* ---------- The intake slip, as a form ----------
+   Room at the edges for its corner codes; the codes themselves
+   ride the same quiet spec as the card's. */
+.variant-card { padding-top: 2.15rem; padding-bottom: 2.05rem; }
+.variant-code {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+.variant-code--tl { top: .55rem; left: .85rem; }
+.variant-code--tr { top: .55rem; right: .85rem; }
+.variant-code--br { bottom: .55rem; right: .85rem; }
+@media (max-width: 620px) {
+  /* the Filed stamp parks at the bottom on small screens;
+     the BR code yields rather than collide */
+  .variant-code--br { display: none; }
 }

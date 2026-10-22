@@ -91,6 +91,8 @@
       <div class="card-scene" id="cardScene">
         <article class="id-card" id="idCard">
           <div class="card-holes" aria-hidden="true"></div>
+          <p class="card-code card-code--tl" aria-hidden="true">AQD-KL · Analyst 1130.7</p>
+          <p class="card-code card-code--tr" aria-hidden="true">1130A-TVA-KL</p>
 
           <header class="card-band">
             <svg class="seal" id="tvaSeal" viewBox="0 0 120 120" role="button" tabindex="0" aria-label="Press the TVA seal">
@@ -121,6 +123,7 @@
           <div class="card-body">
             <figure class="photo-block">
               <div class="photo-window" id="photoWindow" tabindex="0" role="button" aria-label="Identification photograph of the variant. Activate to timeslip." title="Filed photograph. Slips occasionally.">
+                <div class="height-ruler" aria-hidden="true"><span>6′</span><span>5′</span><span>4′</span></div>
                 <img src="./avatar.jpg" alt="Identification photograph of the variant: a luminous figure in smoke, captured mid-anomaly" width="400" height="400">
                 <span class="corner corner--tl" aria-hidden="true"></span>
                 <span class="corner corner--tr" aria-hidden="true"></span>
@@ -146,9 +149,7 @@
             </div>
           </div>
 
-          <p class="card-teal">Clearance Level 7 · Early Access · Monitor, Do Not Prune</p>
-
-          <div class="mag-stripe" aria-hidden="true"><span class="mag-scratch mag-scratch--a"></span><span class="mag-scratch mag-scratch--b"></span><span class="mag-scratch mag-scratch--c"></span></div>
+          <p class="card-clearance">Clearance Level 7 · Early Access · Monitor, Do Not Prune</p>
 
           <footer class="card-foot">
             <div class="barcode" role="img" aria-label="Barcode encoding: THEADWAITHVARMA"></div>
@@ -415,6 +416,18 @@
         <p class="intake-note">Files are generated locally and forgotten immediately, like all good bureaucracy.</p>
         </div>
       </section>
+
+      <!-- The monogram: the file ends the way the prop ends, with
+           the Authority's mark as a layout element, not a logo bug.
+           Original block geometry, drawn for this file. -->
+      <div class="tva-monogram" aria-hidden="true">
+        <svg viewBox="0 0 300 120" focusable="false">
+          <path d="M10 15 H90 V31 H58 V105 H42 V31 H10 Z"></path>
+          <path d="M110 15 H127 L150 82 L173 15 H190 L159 105 H141 Z"></path>
+          <path d="M215 105 L243 15 H257 L285 105 H268 L250 42 L232 105 Z"></path>
+          <path d="M238 74 H262 V85 H238 Z"></path>
+        </svg>
+      </div>
     </div>
   </main>
 
@@ -583,6 +596,7 @@
     <p>No timelines were harmed in the making of this file. One jet ski was denied.</p>
     <p class="colophon-sign">— End of file · Processed by the Kerala Branch Office —</p>
     <p><a class="to-top" href="#idCard">Return to the card ↑</a></p>
+    <p class="colophon-code" aria-hidden="true">ABV-KL/STR1130 32</p>
   </footer>
 
   <!-- Toast -->
